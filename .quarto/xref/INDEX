@@ -4,5 +4,23 @@
   },
   "about.qmd": {
     "about.html": "3feedf48"
+  },
+  "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.qmd": {
+    "Hands-on_Ex01.html": "198b85c7"
+  },
+  "Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04.qmd": {
+    "Hands-on_Ex04.html": "aa3e0fc2"
+  },
+  "Hands-on_Ex/Hands-on_Ex03/Hands-on_Ex03.qmd": {
+    "Hands-on_Ex03.html": "9842999a"
+  },
+  "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.qmd": {
+    "Hands-on_Ex02.html": "8dec453b"
+  },
+  "Hands-on_Ex/Hands-on_Ex02/Learnings from R.qmd": {
+    "Learnings from R.html": "c32f4878"
+  },
+  "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05.qmd": {
+    "Hands-on_Ex05.html": "26d10519"
   }
 }

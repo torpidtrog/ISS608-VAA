@@ -1,0 +1,21 @@
+---
+title: "ggplot learnings"
+author: "Aishwarya Maloo"
+editor: visual
+---
+
+Extra info:
+
+dd + theme(legend.position = "bottom")
+
+download gridExtra package to change legend size
+
+dd + theme(legend.key.size = unit(5, "mm"), legend.key = element_rect(fill = "white"))
+
+https://www3.nd.edu/\~steve/computing_with_data/12_Scales_themes/scales_themes.html
+
+changing axis details:
+
+dd + theme(axis.title.x = element_text(size = 20), axis.title.y = element_text(size = 20),
+
+axis.text = element_text(size = 16))
