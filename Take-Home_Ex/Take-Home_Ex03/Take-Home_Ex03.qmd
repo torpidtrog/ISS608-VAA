@@ -25,7 +25,7 @@ For the purpose of this study, the focus should be on **3-ROOM, 4-ROOM and 5-ROO
 The data used is '*Resale flat princes based on registration date from Jan-2017 onwards',* which was obtained from [Data.gov.sg](https://data.gov.sg/). The data has 147601 rows and 11 columns.
 
 | Columns             | Description                                           |
-|---------------------|-------------------------------------------------------|
+|---------------------|---------------------------------------------------|
 | month               | Month and year of listing                             |
 | town                | Planning area in Singapore                            |
 | flat_type           | Type of flats available - 1 room, 2 room, 3 room, etc |
@@ -43,10 +43,10 @@ The data used is '*Resale flat princes based on registration date from Jan-2017 
 ## 3.1 Install Requisite R Packages
 
 ```{r, message = FALSE, warning = FALSE}
-pacman::p_load(ggstatsplot, ggthemes, plotly, corrplot, lubridate, ggpubr, plotly, treemap, d3treeR, hrbrthemes, ggrepel, RColorBrewer, gganimate, viridis, ggridges, ggrepel, tidyverse)
+pacman::p_load(ggstatsplot, ggthemes, plotly, corrplot, lubridate, ggpubr, plotly, treemap, d3treeR, hrbrthemes, ggrepel, RColorBrewer, gganimate, viridis, ggridges, ggrepel, testthat, hmisc, tidyverse)
 ```
 
-## 3.2 Loading the Dataset
+## 3.2 Loading the Resale Flat - Singapore Dataset
 
 ```{r, message = FALSE, warning = FALSE}
 
@@ -56,7 +56,7 @@ sg_re_price <- read_csv("data/resale_flat_prices.csv")
 ## 3.3 Data Prep
 
 | Issues        | Description                                                                                                                                                                  | Resolution                                                                                                                |
-|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+|--------------|-----------------------------------|------------------------|
 | Outliers      | The resale price has outliers where the price goes up 141800. The top 10% of resale price are outliers.                                                                      | Outliers should be excluded from the data. Anything falling above the 3rd quartile is filtered out from the data. (3.3.4) |
 | Variable type | Date is available in the form of 'YYYY - MM' which is not readable in R                                                                                                      | Format date, seperate month into month and year. (3.3.1)                                                                  |
 | New variables | Lease start date and lease years cannot be used for analysis. Additionally, floor area and reslae price can be used to calculate price per square meter to enhance analysis. | price_psm, priceK and property age are calculated. (3.3.2)                                                                |
@@ -85,7 +85,7 @@ sg_re_price <- sg_re_price %>%
   mutate(property_age = round(2022 - lease_commence_date))
 ```
 
-### 3.3.3 Considering data for year 2022 and 3 room, 4 room and 5 room flat types
+### 3.3.3 Considering data for year 2022 and 3-room, 4-room and 5-room flat types
 
 ```{r, message = FALSE, warning = FALSE, output = FALSE}
 #| code-fold: true
@@ -93,9 +93,17 @@ sg_re_price_2022 <- sg_re_price %>%
   filter(Year == 2022, flat_type %in% c("3 ROOM", "4 ROOM", "5 ROOM"))
 ```
 
-### 3.3.4. Historgram and dealing with outliers
+### 3.3.4 Summary of Data
 
-Histogram for Resale price (in 1000s), Floor area, Property age and price per square meter. We observe that there is a distinct right skew for price per square and resale price ((in 1000s). Our aim is for the data to be normal or as normal as possible. It is observed that there resale prices and price per square metre have a right skew. The rule of thumb for outliers is that data points over the third quartile are eliminated.
+The filtered data has 24, 372 observations. Please find below the summary statistics for each of the variables.
+
+```{r}
+psych::describe(sg_re_price_2022)
+```
+
+### 3.3.5. Historgram and dealing with outliers
+
+To check the normality of data, we chart out histograms for resale price (in 1000s), Floor area, Property age and price per square meter. We observe that there is a distinct right skew for price per square and resale price ((in 1000s). Our aim is for the data to be normal or as normal as possible.
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -121,7 +129,9 @@ p2 <- gghistostats(
   test.value = 60,
   xlab = "Floor area (sqm)"
 ) +
-  theme_minimal() 
+  theme_minimal() +
+  
+  theme(text = element_text(family = "Garamond"))
 
 p3 <- gghistostats(
   data = sg_re_price_2022,
@@ -130,7 +140,9 @@ p3 <- gghistostats(
   test.value = 60,
   xlab = "Property Age"
 ) +
-  theme_minimal() 
+  theme_minimal() +
+  
+  theme(text = element_text(family = "Garamond"))
 
 p4 <- gghistostats(
   data = sg_re_price_2022,
@@ -139,13 +151,13 @@ p4 <- gghistostats(
   test.value = 60,
   xlab = "Resale price psm"
 ) +
-  theme_minimal()
+  theme_minimal()+
+  
+  theme(text = element_text(family = "Garamond"))
 
-p1 + p2 
-p3 + p4
 ```
 
-3\. Remove outliers: We calculate the upper limit and interquartile range for both the variables and then filter out the outliers.
+3\. Remove outliers: The rule of thumb for outliers is that data points over the third quartile are eliminated. We calculate the upper limit and interquartile range for both the variables and then filter out the outliers.
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -164,7 +176,7 @@ sg_re_price_2022_v1 <- sg_re_price_2022 %>%
            (price_psm<= price_psm_upper))
 ```
 
-4\. View data again post outliers
+4\. View data after outliers are removed
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -252,7 +264,12 @@ The distribution for resale price and resale price psm appears to be less right 
 
 ### 4.1.1 Resale prices over the years by flat type
 
-\< explanation 1 \>
+Ridgeline plot is a set of overlapped density plots, and it helps us to compare multiple distirbutions among dataset. They are useful for visualizing changes in distributions over time or space.
+
+From this graph we learn:
+
+1.  The resale prices are more or less contained from 2017 to 2020. There is a marked increase (sharp right movement of all curves) in prices for all flat types in 2020, then a gradual increase is observed from 2021.
+2.  There is a slow increase in prices observed over 2022. The distribution of 5-room flats observes rapid fluctuations in the first quarter of the year. 3-room flats has an even distribution throughout and 4-room flats observe minor fluctuations over 2022.
 
 ::: panel-tabset
 ## 2017 - 2023
@@ -274,12 +291,14 @@ ggplot(data = sg_re_price_flat, aes(x = priceK, y = flat_type, fill = after_stat
   plot.title = element_text(face = "bold", size = 12),
   
   axis.title.x = element_text(size = 10, hjust = 1),
-  axis.title.y = element_text(size = 10, angle = 360),
+  axis.title.y = element_text(size = 10),
   axis.text = element_text(size = 8)) +
   
   scale_fill_viridis(name = "priceK", option = "C") +
   
-  labs(title = 'Resale Prices by Flat Type: {frame_time}') +
+  labs(title = 'Resale Prices by Flat Type: {frame_time}',
+       y = "Resale Price in Thousands (SGD)",
+       x = "Flat Type") +
   transition_time(sg_re_price_flat$Year) +
   ease_aes('linear')
 ```
@@ -300,12 +319,14 @@ ggplot(data = sg_re_price_2022_v1, aes(x = priceK, y = flat_type, fill = after_s
   plot.title = element_text(face = "bold", size = 12),
   
   axis.title.x = element_text(size = 10, hjust = 1),
-  axis.title.y = element_text(size = 10, angle = 360),
+  axis.title.y = element_text(size = 10),
   axis.text = element_text(size = 8)) +
   
   scale_fill_viridis(name = "priceK", option = "C") +
   
-  labs(title = 'Resale Prices by Flat Type in 2022, Month: {frame_time}') +
+  labs(title = 'Resale Prices by Flat Type in 2022, Month: {frame_time}',
+       x = "Flat Type",
+       y = "Resale Price in Thousands (SGD)") +
   transition_time(sg_re_price_2022_v1$Month) +
   ease_aes('linear')
 ```
@@ -313,7 +334,7 @@ ggplot(data = sg_re_price_2022_v1, aes(x = priceK, y = flat_type, fill = after_s
 
 ### 4.1.2 Proportion of flat types in Singapore
 
-4 room flats are the most popular flat type in Singapore, accounting for nearly 50% of the flats. 5 room and 3 rooms have relatively the same proportion of flats in Singapore - accounting for a quarter of each!
+The data clearly shows that 4-room apartments are the most popular in Singapore, accounting for nearly 50% of the flat types. 5-room and 3-rooms have relatively the same proportion of flats in Singapore - accounting for a quarter of each!
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -342,7 +363,13 @@ theme_minimal()
 
 ### 4.1.3 Boxplot of Resale price by flat types
 
-As expected, the median resale prices for 5 BHK is the highest followed by 4 BHK then 3 BHK
+In descriptive statistics, a box plot or boxplot is a type of chart often used for EDA. Box plots visually show the distribution of numerical data and skewness through displaying the data quartiles (or percentiles) and averages.
+
+When the median line appears in the middle of the boxplot, the data is normally distributed. We observe that:
+
+1.  As expected, the median is the highest for 5-room flats, followed by 4-room and lastly 3-room flats.
+2.  The dispersion (interquartile range) is the smallest for 3-room flats and largest for 5 room flats. This suggests that the 3 room flats are spread out around the median in comparison to 4 or 5 room flats.
+3.  There is higher presence of outliers for 3-room flats, some even going up to 930000 (3rd quartile for 5-room flat)
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -361,7 +388,7 @@ fig <- plot_ly(
   y = ~priceK,
   type = "box",
   color = ~flat_type,
-  colors = "BuGn",
+  colors = "YlGnBu",
   showlegend = FALSE,
   boxmean = TRUE
 ) %>% 
@@ -374,7 +401,7 @@ fig
 
 ### 4.1.4 Is there an increase in resale price monthly by flat type?
 
-\< no discernible increase)
+Media outlets have been reporting that there has been a dramatic increase in the resale prices for HDBs. Real estate data is known to have many outliers, hence the best metric for comparison over time and distribution is median (they are unaffected by outliers). In the graph below, we observe that there is no discernible difference in the median prices, monthly, for 3 room, 4 room, 5 room flats,
 
 ::: panel-tabset
 ## Flat Type
@@ -506,7 +533,12 @@ theme(text = element_text(family = "Garamond"),
 
 ## 4.2 Planning Area
 
-4.2.1 Resale price by planning area over time
+### 4.2.1 Resale price by planning area over time
+
+The ridge plot showcases:
+
+1.  The resale prices across planning areas are more or less contained from 2017 to 2020. There is a marked increase (sharp right movement of all curves) in prices for all planning areas in 2020, then a gradual increase is observed from 2021.
+2.  The distribution across planning areas is more or less constant till 2020. Post 2020, most of the distributions are flattening out indicating that the prices are widely distributed over these time periods. Bukit Timah, Central Area, Queenstown have 2 - 3 humps in their distribution implying that they have properties in the lower, medium and upper range.
 
 ::: panel-tabset
 ## 2017 - 2023
@@ -561,77 +593,15 @@ ggplot(data = sg_re_price_2022_v1, aes(x = priceK, y = town, fill = after_stat(x
 ```
 :::
 
-### 4.1.3 Median income by planning areas
-
-Creating two new datasets:
-
-1.  a\) **median_priceK** (median resale price in thousands) by planning area
-
-    b\) **median_price**\_psm (median resale price psm) by planning area
-
-```{r, message = FALSE, warning = FALSE, output = FALSE}
-#| code-fold: true
-sg_re_price_2022_median_priceK <- sg_re_price_2022_v1 %>% 
-  group_by(town) %>% 
-  summarise(median_priceK = median(priceK, na.rm = TRUE))
-
-sg_re_price_2022_median_price_psm <- sg_re_price_2022_v1 %>% 
-  group_by(town) %>% 
-  summarise(median_price_psm = median(price_psm, na.rm = TRUE))
-```
-
-Combining the two datasets
-
-```{r, message = FALSE, warning = FALSE, output = FALSE}
-#| code-fold: true
-sg_re_price_2022_comb <- left_join(sg_re_price_2022_median_priceK, sg_re_price_2022_median_price_psm, by = c("town" = "town"))
-```
-
-Creating a combined chart to compare median price and median price per psm by planning area
-
-```{r, message = FALSE, warning = FALSE}
-#| code-fold: true
-
-# see if you can modify tooltip
-
-scale = 10
-
-PA <- ggplot(sg_re_price_2022_comb, aes(x = reorder(town, median_priceK))) +
-  
-  geom_bar(aes(x = reorder(town, median_priceK), y = median_priceK), stat = "identity", fill = "#d4ad44") +
-  
-  geom_point(aes(y = median_price_psm/scale), color = "#1d5a6b", size = 2) +
-  
-  scale_y_continuous(sec.axis = sec_axis(~.*scale, name="Price ($)")) + 
-  
- labs( title = "Median Price and Price psm by Planning area",
-       x = "Planning Area",
-       y = "Median Price/Price psm") +
-  
-  coord_flip() + 
-
-theme(text = element_text(family = "Garamond"),
-        plot.title = element_text(hjust = 0.4, size = 12, face = 'bold'),
-        plot.margin = margin(20, 20, 20, 20),
-        legend.position = "none",
-        
-        panel.background = element_rect(fill = 'white'),
-        panel.grid.major = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.minor.y = element_line(linewidth = 0.25, linetype = 'dashed', colour = '#bebebe'),
-        
-        axis.text = element_text(size = 8, face = "bold"),
-        axis.title = element_text(hjust = 0.5, size = 12, face = "bold"))
-
-
-ggplotly(PA, tooltip = "text")
-```
-
-\<some explanation\>
-
 ## 4.3 Flat type comparison by planning area
 
 ### 4.3.1 Proportion of Flat types by Planning area in Singapore
+
+We now look into the proportion of flat types by planning areas. We observe that:
+
+1.  Toa Payoh, Ang Mo Kio, Bedok, Central Area have the highest proprtion of 3-room flats, whereas Bukit Timah and Paris Ris have the least.
+2.  Yishun, Woodlands, Serangoon have the highest proportion of 4-room flats.
+3.   Sengkang, Punggol have the highest proportion of 5-room flats.
 
 ::: panel-tabset
 ## Plot
@@ -655,7 +625,7 @@ prop <- ggplot(prop_sg,
   scale_fill_viridis(discrete = T, option = "E") +
   
   theme(text = element_text(family = "Garamond"),
-        plot.title = element_text(hjust = 0.6, size = 15, face = 'bold'),
+        plot.title = element_text(hjust = 0.4, size = 15, face = 'bold'),
         plot.margin = margin(20, 20, 20, 20),
         legend.position = "bottom",
         axis.text = element_text(size = 8, face = "bold"),
@@ -681,6 +651,50 @@ prop_sg
 :::
 
 ### 4.3.2 Resale prices of different flat types by planning area
+
+The dumbell chart showcases the minimum and maximum prices for each planning area.
+
+1.  Woodlands, Sembawang, Choa Chu Kang provide more affordable flats with their maximum price being below SGD 800,000. Conversely, most of the other regions have wider distribution of prices ranging from mid to exorbitant.
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+areas = unique(sg_re_price_2022_v1$town)
+PA = c()
+min_price = c()
+max_price = c()
+
+for(area in areas){
+  df <- sg_re_price_2022_v1[sg_re_price_2022_v1$town == area,]
+  PA = c(PA, area)
+  min_price = c(min_price, min(df$priceK))
+  max_price = c(max_price, max(df$priceK))
+}
+
+df <- data.frame("Planning_Area" = PA, "Min_Price" = min_price, "Max_Price" = max_price, check.names=FALSE)
+
+```
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+dumbell <- plot_ly(df) %>% 
+ add_segments(x = ~Min_Price, xend = ~Max_Price, y = ~Planning_Area, yend = ~Planning_Area, showlegend = FALSE) %>% 
+ add_markers(x = ~Min_Price, y = ~Planning_Area, name = "Min", color = I("#e66819")) %>% 
+ add_markers(x = ~Max_Price, y = ~Planning_Area, name = "Max", color = I("#bf0d31")) %>% 
+ layout(
+    title = "Resale Price in 1000s Difference Across Planning Areas",
+    xaxis = list(title = "Resale Price in 1000s (SGD)"),
+    yaxis = list(title = "Planning Area"),
+    margin = list(l = 70)
+  )
+
+dumbell
+```
+
+The dumbell chart is a parochial view of the range of resale price. Hence, we further delve into the box and whiskers plot of 3-room, 4-room, and 5-room flat types across the planning regions.
+
+We see that areas such as Jurong West and Tampines have the widest price range for 5-room type flats, especially towards the lucrative side of the price. In Marine Parade, the 5-room flat types were significantly higher priced than 3-room and 4-room type flats. The opposite was true for areas such as Serangoon.
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -712,41 +726,11 @@ theme(text = element_text(family = "Garamond"),
 ggplotly(p)
 ```
 
-```{r}
-areas = unique(sg_re_price_2022_v1$town)
-PA = c()
-min_price = c()
-max_price = c()
-
-for(area in areas){
-  df <- sg_re_price_2022_v1[sg_re_price_2022_v1$town == area,]
-  PA = c(PA, area)
-  min_price = c(min_price, min(df$priceK))
-  max_price = c(max_price, max(df$priceK))
-}
-
-df <- data.frame("Planning_Area" = PA, "Min_Price" = min_price, "Max_Price" = max_price, check.names=FALSE)
-
-```
-
-```{r, message = FALSE, warning = FALSE}
-#| code-fold: true
-dumbell <- plot_ly(df) %>% 
- add_segments(x = ~Min_Price, xend = ~Max_Price, y = ~Planning_Area, yend = ~Planning_Area, showlegend = FALSE) %>% 
- add_markers(x = ~Min_Price, y = ~Planning_Area, name = "Min", color = I("#e66819")) %>% 
- add_markers(x = ~Max_Price, y = ~Planning_Area, name = "Max", color = I("#bf0d31")) %>% 
- layout(
-    title = "Resale Price in 1000s Difference Across Planning Areas",
-    xaxis = list(title = "Resale Price in 1000s"),
-    yaxis = list(title = "Planning Area"),
-    margin = list(l = 70)
-  )
-dumbell
-```
-
 ## 4.2 Area & Age by Flat Type
 
 ### 4.2.1 Correlation for Area, Age with Resale Price
+
+The correlation chart shows that there is a positive relationship between area of property and resale price i.e. larger the property size gets, higher the resale price. Resale price and age have a weak negative relationship.
 
 ::: panel-tabset
 ## Area Correlation
@@ -803,6 +787,8 @@ theme(text = element_text(family = "Garamond"),
 
 ### 4.2.2 Treemap for Age and Area
 
+Through the treemap, we see on overall glimpse of flat types by prices per square meter and resale prices in 000s across all planning areas.
+
 ::: panel-tabset
 ## Area Treemap
 
@@ -838,11 +824,13 @@ treemap_age <- treemap (sg_re_price_2022_v1,
 ```
 :::
 
-# X. References
+# 5. References
 
-1.  \[How to remove Outliers\](https://universeofdatascience.com/how-to-remove-outliers-from-data-in-r/#:\~:text=Firstly%2C%20we%20find%20first%20(Q1,()%20function%20to%20remove%20outliers. "Outliers in R")?
-2.  https://statisticsglobe.com/plotly-boxplot-r
-3.  https://statisticsglobe.com/change-colors-plotly-graph-r - change color inside
-4.  https://plotly.com/r/figure-labels/
-5.  https://r-graph-gallery.com/237-interactive-treemap.html
-6.  https://stackoverflow.com/questions/37817809/r-ggplot-stacked-bar-chart-with-counts-on-y-axis-but-percentage-as-label
+1.  Dag, Osman, 'How to remove Outliers from data in R?', 'Data Science Team', March 4, 2022 ([link](https://universeofdatascience.com/how-to-remove-outliers-from-data-in-r/#:~:text=Firstly%2C%20we%20find%20first%20(Q1,()%20function%20to%20remove%20outliers.%20%22Outliers%20in%20R%22))
+2.  White, Kerber, 'How to Draw a plotly Boxplot in R (Example)', 'Statistics Globe', February, 2022 ([link](https://statisticsglobe.com/plotly-boxplot-r))
+3.  'Setting the Font, Title, Legend Entries, and Axis Titles in R' ([link](https://plotly.com/r/figure-labels/))
+4.  'R: ggplot stacked bar chart with counts on y axis but percentage as label', 2017 ([link](https://stackoverflow.com/questions/37817809/r-ggplot-stacked-bar-chart-with-counts-on-y-axis-but-percentage-as-label))
+5.  'Ridgeline Plots', Github ([link](https://jtr13.github.io/cc19/ridgeline-plots.html))
+6.  McLeod, Saul, 'What does a boxplot tell you?', 'Simply Psychology', 2019 ([link](https://www.simplypsychology.org/boxplots.html#:~:text=The%20box%20plot%20shape%20will,then%20the%20distribution%20is%20symmetric.))
+7.  Wenyi, Wang, 'An analysis of Singapore property resale market price based on transaction from 2017 to 2019', July 17, 2020 ([link](https://rpubs.com/Wang_Wenyi/640078))
+8.  Qingquan, XIA, 'Assignment 5', 'RPubs', August, 2020 ([link](https://rpubs.com/x769820941/assignment-5))
