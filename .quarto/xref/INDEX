@@ -22,5 +22,20 @@
   },
   "Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05.qmd": {
     "Hands-on_Ex05.html": "26d10519"
+  },
+  "In-Class_Ex/In-Class_Ex03/In-Class_Ex03.qmd": {
+    "In-Class_Ex03.html": "3850e2cd"
+  },
+  "In-Class_Ex/In-Class_Ex04/In-Class_Ex04.qmd": {
+    "In-Class_Ex04.html": "98865ad4"
+  },
+  "In-Class_Ex/In-Class_Ex05/In-Class_Ex05_Ternary.qmd": {
+    "In-Class_Ex05_Ternary.html": "13e1f691"
+  },
+  "In-Class_Ex/In-Class_Ex05/In-Class_Ex05_Heatmap.qmd": {
+    "In-Class_Ex05_Heatmap.html": "6f9c5da3"
+  },
+  "In-Class_Ex/In-Class_Ex05/In-Class_Ex05_Corrplot.qmd": {
+    "In-Class_Ex05_Corrplot.html": "06972bc6"
   }
 }

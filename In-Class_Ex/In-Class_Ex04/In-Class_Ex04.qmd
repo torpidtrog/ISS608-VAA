@@ -1,0 +1,155 @@
+---
+title: "In-Class_Ex04"
+author: "Aishwarya Maloo"
+date: "4 February 2023"
+date-modified: "`r Sys.Date()`"
+format: html
+execute: 
+  echo: true
+  eval: true
+  warning: false
+editor: visual
+---
+
+```{r}
+#| echo: false
+pacman::p_load(plotly, DT, patchwork, ggstatsplot, ggpubr, performance, see, readxl, parameters, easystats, gtsummary, crosstalk, gganimate, ggdist,tidyverse)
+```
+
+Importing exam data for performing visualisation
+
+```{r}
+exam_data <- read.csv("data/Exam_data.csv")
+```
+
+Working with visual variable: plot_ly() method. One can hover over the points to see the coordinates, play around with the legend - to highlight one or more and one can zoom in and out.
+
+```{r}
+plot_ly(data = exam_data,
+        x = ~ENGLISH,
+        y = ~MATHS,
+        color = ~RACE)
+```
+
+Creating an interactive plot using ggplotly:
+
+```{r}
+p <- ggplot(data=exam_data, 
+              aes(x = MATHS,
+                  y = ENGLISH)) +
+  geom_point(size=1) +
+  coord_cartesian(xlim=c(0,100),
+                  ylim=c(0,100))
+
+ggplotly(p)
+```
+
+```{r}
+ggbetweenstats(
+  data = exam_data,
+  x = GENDER,
+  y = MATHS,
+  type = "p",
+  messages = FALSE
+)
+```
+
+```{r}
+ggscatterstats(
+  data = exam_data,
+  x = ENGLISH,
+  y = MATHS,
+  marginal = FALSE)
+```
+
+```{r}
+car_resale <- read_xls("data/ToyotaCorolla.xls", "data")
+```
+
+We want to estimate the price of the car
+
+```{r}
+model <- lm(Price ~ Age_08_04 + Mfg_Year + KM + Weight + Guarantee_Period, data = car_resale)
+
+model
+```
+
+gtsummary will take my regression model and save it in a data table form. More in https://www.danieldsjoberg.com/gtsummary/articles/tbl_regression.html
+
+```{r}
+model %>% tbl_regression(intercept = TRUE)
+```
+
+To check for multicollinearity
+
+```{r}
+check_c <- check_collinearity(model)
+plot(check_c)
+```
+
+```{r}
+View(check_c)
+model[["coefficients"]]
+```
+
+Running model 1
+
+```{r}
+model1 <- lm(Price ~ Age_08_04 + KM + Weight + Guarantee_Period, data = car_resale)
+```
+
+Check_model to perform all checks. We can do this for linear model but cannot do it for bootstrap, etc.
+
+```{r}
+check_n <- check_normality(model1)
+check_h <- check_heteroskedasticity(model1)
+
+check_n
+check_h
+
+check_model(model1)
+```
+
+```{r}
+ggcoefstats(model1, 
+            output = "plot")
+```
+
+## Visualising the uncertainty of point estimates
+
+```{r}
+my_sum <- exam_data %>%
+  group_by(RACE) %>%
+  summarise(
+    n=n(),
+    mean=mean(MATHS),
+    sd=sd(MATHS)
+    ) %>%
+  mutate(se=sd/sqrt(n-1))
+```
+
+```{r}
+knitr::kable(head(my_sum), format = 'html')
+```
+
+### Visualizing the uncertainty of point estimates: ggplot2 methods
+
+```{r}
+ggplot(my_sum) +
+  geom_errorbar(
+    aes(x=RACE, 
+        ymin=mean-se, 
+        ymax=mean+se), 
+    width=0.2, 
+    colour="black", 
+    alpha=0.9, 
+    size=0.5) +
+  geom_point(aes
+           (x=RACE, 
+            y=mean), 
+           stat="identity", 
+           color="red",
+           size = 1.5,
+           alpha=1) +
+  ggtitle("Standard error of mean maths score by race")
+```
