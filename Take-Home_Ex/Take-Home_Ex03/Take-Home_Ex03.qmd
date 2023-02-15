@@ -1,0 +1,848 @@
+---
+title: "Take-Home_Ex03"
+author: "Aishwarya Maloo"
+date: "10 February 2023"
+date-modified: "`r Sys.Date()`"
+format: html
+execute: 
+  echo: true
+  eval: true
+  warning: false
+editor: visual
+output:
+  html_document:
+  code_folding: hide
+---
+
+# 1. The Task
+
+The task is to uncover the salient patterns of the resale prices of public housing property by residential towns and estates in Singapore by using appropriate analytical visualisation techniques learned in **Lesson 4: Fundamentals of Visual Analytics**. Students are encouraged to apply appropriate interactive techniques to enhance user and data discovery experiences.
+
+For the purpose of this study, the focus should be on **3-ROOM, 4-ROOM and 5-ROOM types**. You can choose to focus on either one housing type or multiple housing types. The study period should be on **2022**.
+
+# 2. Description of Dataset
+
+The data used is '*Resale flat princes based on registration date from Jan-2017 onwards',* which was obtained from [Data.gov.sg](https://data.gov.sg/). The data has 147601 rows and 11 columns.
+
+| Columns             | Description                                           |
+|---------------------|-------------------------------------------------------|
+| month               | Month and year of listing                             |
+| town                | Planning area in Singapore                            |
+| flat_type           | Type of flats available - 1 room, 2 room, 3 room, etc |
+| block               | Block number of flat                                  |
+| street_name         | Name of the street where the flat is located          |
+| storey_range        | Range of storey                                       |
+| floor_area_sqm      | The area of the flat in square metre                  |
+| flat_model          | Model of flat type - new generation, model A, etc     |
+| lease_commence_date | Year the lease started                                |
+| remaining_lease     | Number of years and months pending on lease lapse     |
+| resale_price        | Total resale price of flat                            |
+
+# 3. Data Wrangling and Preparation
+
+## 3.1 Install Requisite R Packages
+
+```{r, message = FALSE, warning = FALSE}
+pacman::p_load(ggstatsplot, ggthemes, plotly, corrplot, lubridate, ggpubr, plotly, treemap, d3treeR, hrbrthemes, ggrepel, RColorBrewer, gganimate, viridis, ggridges, ggrepel, tidyverse)
+```
+
+## 3.2 Loading the Dataset
+
+```{r, message = FALSE, warning = FALSE}
+
+sg_re_price <- read_csv("data/resale_flat_prices.csv")
+```
+
+## 3.3 Data Prep
+
+| Issues        | Description                                                                                                                                                                  | Resolution                                                                                                                |
+|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| Outliers      | The resale price has outliers where the price goes up 141800. The top 10% of resale price are outliers.                                                                      | Outliers should be excluded from the data. Anything falling above the 3rd quartile is filtered out from the data. (3.3.4) |
+| Variable type | Date is available in the form of 'YYYY - MM' which is not readable in R                                                                                                      | Format date, seperate month into month and year. (3.3.1)                                                                  |
+| New variables | Lease start date and lease years cannot be used for analysis. Additionally, floor area and reslae price can be used to calculate price per square meter to enhance analysis. | price_psm, priceK and property age are calculated. (3.3.2)                                                                |
+
+### 3.3.1. Separating the date into month and year
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+sg_re_price <- sg_re_price %>% 
+  separate(month, c("Year", "Month"), sep = "-")
+```
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+sg_re_price$Year <- strtoi(sg_re_price$Year)
+sg_re_price$Month <- strtoi(sg_re_price$Month)
+```
+
+### 3.3.2 Creating new variables
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+sg_re_price <- sg_re_price %>%
+  mutate(price_psm = round(resale_price / floor_area_sqm)) %>%
+  mutate(priceK = round(resale_price / 1000)) %>%
+  mutate(property_age = round(2022 - lease_commence_date))
+```
+
+### 3.3.3 Considering data for year 2022 and 3 room, 4 room and 5 room flat types
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+sg_re_price_2022 <- sg_re_price %>%
+  filter(Year == 2022, flat_type %in% c("3 ROOM", "4 ROOM", "5 ROOM"))
+```
+
+### 3.3.4. Historgram and dealing with outliers
+
+Histogram for Resale price (in 1000s), Floor area, Property age and price per square meter. We observe that there is a distinct right skew for price per square and resale price ((in 1000s). Our aim is for the data to be normal or as normal as possible. It is observed that there resale prices and price per square metre have a right skew. The rule of thumb for outliers is that data points over the third quartile are eliminated.
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+set.seed(1234)
+
+#need to change bar colors, line color, ggtitles, gglabs
+
+p1 <- gghistostats(
+  data = sg_re_price_2022,
+  x = priceK,
+  type = "bayes",
+  test.value = 60,
+  xlab = "Resale Price in Thousands") +
+  
+  theme_minimal() +
+  
+  theme(text = element_text(family = "Garamond"))
+        
+p2 <- gghistostats(
+  data = sg_re_price_2022,
+  x = floor_area_sqm,
+  type = "bayes",
+  test.value = 60,
+  xlab = "Floor area (sqm)"
+) +
+  theme_minimal() 
+
+p3 <- gghistostats(
+  data = sg_re_price_2022,
+  x = property_age,
+  type = "bayes",
+  test.value = 60,
+  xlab = "Property Age"
+) +
+  theme_minimal() 
+
+p4 <- gghistostats(
+  data = sg_re_price_2022,
+  x = price_psm,
+  type = "bayes",
+  test.value = 60,
+  xlab = "Resale price psm"
+) +
+  theme_minimal()
+
+p1 + p2 
+p3 + p4
+```
+
+3\. Remove outliers: We calculate the upper limit and interquartile range for both the variables and then filter out the outliers.
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+# Calculating the upper limit and Interquartile range for Price in 1000s and price per square meter
+
+IQR_priceK = IQR(sg_re_price_2022$priceK)
+IQR_price_psm = IQR(sg_re_price_2022$price_psm)
+
+priceK_upper = quantile(sg_re_price_2022$priceK,probs = 0.9)+1.5*IQR_priceK
+price_psm_upper = quantile(sg_re_price_2022$price_psm,probs = 0.9)+1.5*IQR_price_psm
+
+# Filtering out the outliers
+sg_re_price_2022_v1 <- sg_re_price_2022 %>%
+           filter ((priceK <= priceK_upper) &
+           (price_psm<= price_psm_upper))
+```
+
+4\. View data again post outliers
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+#To plot normality, we need to ascertain the mean and std. deviation
+
+mean_priceK = mean(sg_re_price_2022_v1$priceK)
+std_priceK = sd(sg_re_price_2022_v1$priceK)
+
+priceK_norm <- ggplot(sg_re_price_2022_v1, aes(priceK))+
+  geom_histogram(aes(y=..density..), fill = '#133337', color = '#eeeeee')+
+  
+  stat_function(fun = dnorm, args = list(mean = mean_priceK, sd = std_priceK), col="#66cccc", size = .7)+
+  
+  labs(title = 'Normality Check on Distribution of Resale Price', 
+       x = "Resale price in Thousands (SGD)")+
+  
+  theme_minimal()+
+  
+  theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.1, size = 10, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        
+        panel.background = element_rect(fill = 'white'),
+        panel.grid.major.x = element_line(linewidth = 0.25, linetype = 'dashed', colour = '#bebebe'),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        
+        
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(size = 8, face = "bold"),
+        axis.title.x = element_text(hjust = 0.4, size = 10, face = "bold"))
+```
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+#To plot normality, we need to ascertain the mean and std. deviation
+
+mean_price_psm = mean(sg_re_price_2022_v1$price_psm)
+std_price_psm = sd(sg_re_price_2022_v1$price_psm)
+
+price_per_psm_norm <- ggplot(sg_re_price_2022_v1, aes(price_psm))+
+  geom_histogram(aes(y=..density..), fill = '#133337', color = '#eeeeee')+
+  stat_function(fun = dnorm, args = list(mean = mean_price_psm, sd = std_price_psm), col="#66cccc", size = .7)+
+  
+  labs(title = 'Normality Check on Distribution of Resale Price psm', 
+       x = "Resale price per sqm (SGD)", 
+       caption = "Source: Data.gov.sg")+
+  
+  theme_minimal()+
+  
+  theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.1, size = 10, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        plot.caption = element_text(face = "italic", size = 10),
+        
+        panel.background = element_rect(fill = 'white'),
+        panel.grid.major.x = element_line(linewidth = 0.25, linetype = 'dashed', colour = '#bebebe'),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        
+        
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.text.x = element_text(size = 8, face = "bold"),
+        axis.title.x = element_text(hjust = 0.5, size = 10, face = "bold"))
+```
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+priceK_norm + price_per_psm_norm
+```
+
+The distribution for resale price and resale price psm appears to be less right skewed post removing outliers!
+
+# 4. Data Visualisation
+
+## 4.1 Flat Type
+
+### 4.1.1 Resale prices over the years by flat type
+
+\< explanation 1 \>
+
+::: panel-tabset
+## 2017 - 2023
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+sg_re_price_flat <- sg_re_price %>%
+  filter(flat_type %in% c("3 ROOM", "4 ROOM", "5 ROOM"))
+
+ggplot(data = sg_re_price_flat, aes(x = priceK, y = flat_type, fill = after_stat(x))) +
+  
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  
+  theme_minimal() +
+  
+  theme(legend.position="none",
+  text = element_text(family = "Garamond"),
+  plot.title = element_text(face = "bold", size = 12),
+  
+  axis.title.x = element_text(size = 10, hjust = 1),
+  axis.title.y = element_text(size = 10, angle = 360),
+  axis.text = element_text(size = 8)) +
+  
+  scale_fill_viridis(name = "priceK", option = "C") +
+  
+  labs(title = 'Resale Prices by Flat Type: {frame_time}') +
+  transition_time(sg_re_price_flat$Year) +
+  ease_aes('linear')
+```
+
+## 2022
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+ggplot(data = sg_re_price_2022_v1, aes(x = priceK, y = flat_type, fill = after_stat(x))) +
+  
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  
+  theme_minimal() +
+  
+  theme(legend.position="none",
+  text = element_text(family = "Garamond"),
+  plot.title = element_text(face = "bold", size = 12),
+  
+  axis.title.x = element_text(size = 10, hjust = 1),
+  axis.title.y = element_text(size = 10, angle = 360),
+  axis.text = element_text(size = 8)) +
+  
+  scale_fill_viridis(name = "priceK", option = "C") +
+  
+  labs(title = 'Resale Prices by Flat Type in 2022, Month: {frame_time}') +
+  transition_time(sg_re_price_2022_v1$Month) +
+  ease_aes('linear')
+```
+:::
+
+### 4.1.2 Proportion of flat types in Singapore
+
+4 room flats are the most popular flat type in Singapore, accounting for nearly 50% of the flats. 5 room and 3 rooms have relatively the same proportion of flats in Singapore - accounting for a quarter of each!
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+HDB_count  <- sg_re_price_2022_v1 %>%
+  group_by(flat_type) %>%
+  summarize(
+    count = n()) %>% 
+  mutate(hdb_pie_pct = round(count/sum(count)*100)) %>% 
+  mutate(ypos_p = rev(cumsum(rev(hdb_pie_pct))),
+         pos_p = hdb_pie_pct/2 + lead(ypos_p,1),
+         pos_p = if_else(is.na(pos_p), hdb_pie_pct/2, pos_p))
+
+ggplot(HDB_count, aes(x = "" , y = hdb_pie_pct, fill = fct_inorder(flat_type))) +
+  geom_col(width = 1, color = 1) +
+  coord_polar(theta = "y") +
+  scale_fill_brewer(palette = "YlGnBu") +
+  geom_label_repel(data = HDB_count,
+                   aes(y = pos_p, label = paste0(hdb_pie_pct, "%")),
+                   size = 4.5, nudge_x = 1, color = c(1, 1, 1), show.legend = FALSE) +
+  guides(fill = guide_legend(title = "Flat Type")) +
+  labs(title = "Proportion of Flat Types in Singapore")+
+theme(legend.position = "bottom")+
+theme_minimal()
+```
+
+### 4.1.3 Boxplot of Resale price by flat types
+
+As expected, the median resale prices for 5 BHK is the highest followed by 4 BHK then 3 BHK
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+t <- list(
+  family = "Garamond",
+  size = 19,
+  face = "bold")
+
+t1 <- list(
+  family = "Garamond",
+  size = 15,
+  face = "bold")
+
+fig <- plot_ly(
+  data = sg_re_price_2022_v1,
+  y = ~priceK,
+  type = "box",
+  color = ~flat_type,
+  colors = "BuGn",
+  showlegend = FALSE,
+  boxmean = TRUE
+) %>% 
+  layout(title= list(text = "Boxplot of resale price in Thousands by flat type",font = t1),
+         xaxis = list(title = list(text ='Flat Type', font = t1)),
+         yaxis = list(title = list(text ='Resale Price in Thousands (SGD)', font = t1)))
+
+fig
+```
+
+### 4.1.4 Is there an increase in resale price monthly by flat type?
+
+\< no discernible increase)
+
+::: panel-tabset
+## Flat Type
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+ggplot(na.omit(sg_re_price_2022_v1),aes(x = flat_type, y = priceK)) +
+  
+  geom_boxplot(aes(fill = as.factor(Month)), color = "#c0c0c0") +
+  
+  stat_summary(fun.y = "mean", geom = "point", color = "black") +
+  
+  theme_minimal() +
+  
+  scale_fill_brewer(palette = "Paired") +
+
+ labs( title = "Monthly Resale prices by Flat Types",
+       y = "Resale price (1000s)",
+       x = "Flat Type",
+       fill = "Month") +
+
+theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.5, size = 12, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = "bottom",
+        
+        axis.text = element_text(size = 10, face = "bold"),
+        axis.title.x = element_text(hjust = 0.5, size = 12, face = "bold"),
+        axis.title.y = element_text(hjust = 0.5, size = 12, face = "bold"))
+
+```
+
+## 3 Room
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+na.omit(sg_re_price_2022_v1) %>% 
+  filter(flat_type == "3 ROOM") %>% 
+  ggplot(aes(x = flat_type, y = priceK)) +
+  
+  geom_boxplot(aes(fill = as.factor(Month)), color = "#c0c0c0") +
+  
+  stat_summary(fun.y = "mean", geom = "point", color = "black") +
+  
+  theme_minimal() +
+  
+  scale_fill_brewer(palette = "Paired") +
+
+ labs( title = "Monthly Resale prices by Flat Types",
+       y = "Resale price (1000s)",
+       x = "Flat Type",
+       fill = "Month") +
+
+theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.5, size = 12, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = "bottom",
+        
+        axis.text = element_text(size = 10, face = "bold"),
+        axis.title.x = element_text(hjust = 0.5, size = 12, face = "bold"),
+        axis.title.y = element_text(hjust = 0.5, size = 12, face = "bold"))
+```
+
+## 4 Room
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+na.omit(sg_re_price_2022_v1) %>% 
+  filter(flat_type == "4 ROOM") %>% 
+  ggplot(aes(x = flat_type, y = priceK)) +
+  
+  geom_boxplot(aes(fill = as.factor(Month)), color = "#c0c0c0") +
+  
+  stat_summary(fun.y = "mean", geom = "point", color = "black") +
+  
+  theme_minimal() +
+  
+  scale_fill_brewer(palette = "Paired") +
+
+ labs( title = "Monthly Resale prices by Flat Types",
+       y = "Resale price (1000s)",
+       x = "Flat Type",
+       fill = "Month") +
+
+theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.5, size = 12, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = "bottom",
+        
+        axis.text = element_text(size = 10, face = "bold"),
+        axis.title.x = element_text(hjust = 0.5, size = 12, face = "bold"),
+        axis.title.y = element_text(hjust = 0.5, size = 12, face = "bold"))
+```
+
+## 5 Room
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+na.omit(sg_re_price_2022_v1) %>% 
+  filter(flat_type == "5 ROOM") %>% 
+  ggplot(aes(x = flat_type, y = priceK)) +
+  
+  geom_boxplot(aes(fill = as.factor(Month)), color = "#c0c0c0") +
+  
+  stat_summary(fun.y = "mean", geom = "point", color = "black") +
+  
+  theme_minimal() +
+  
+  scale_fill_brewer(palette = "Paired") +
+
+ labs( title = "Monthly Resale prices by Flat Types",
+       y = "Resale price (1000s)",
+       x = "Flat Type",
+       fill = "Month") +
+
+theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.5, size = 12, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = "bottom",
+        
+        axis.text = element_text(size = 10, face = "bold"),
+        axis.title.x = element_text(hjust = 0.5, size = 12, face = "bold"),
+        axis.title.y = element_text(hjust = 0.5, size = 12, face = "bold"))
+```
+:::
+
+## 4.2 Planning Area
+
+4.2.1 Resale price by planning area over time
+
+::: panel-tabset
+## 2017 - 2023
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+ggplot(data = sg_re_price, aes(x = priceK, y = town, fill = after_stat(x))) +
+  
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  
+  theme_minimal() +
+  
+  theme(legend.position="none",
+  text = element_text(family = "Garamond"),
+  plot.title = element_text(face = "bold", size = 12),
+  
+  axis.title.x = element_text(size = 10, hjust = 1),
+  axis.title.y = element_text(size = 10, angle = 360),
+  axis.text = element_text(size = 8)) +
+  
+  scale_fill_viridis(name = "priceK", option = "C") +
+  
+  labs(title = 'Resale Prices by Planning Area: {frame_time}') +
+  transition_time(sg_re_price$Year) +
+  ease_aes('linear')
+```
+
+## 2022
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+ggplot(data = sg_re_price_2022_v1, aes(x = priceK, y = town, fill = after_stat(x))) +
+  
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  
+  theme_minimal() +
+  
+  theme(legend.position="none",
+  text = element_text(family = "Garamond"),
+  plot.title = element_text(face = "bold", size = 12),
+  
+  axis.title.x = element_text(size = 10, hjust = 1),
+  axis.title.y = element_text(size = 10, angle = 360),
+  axis.text = element_text(size = 8)) +
+  
+  scale_fill_viridis(name = "priceK", option = "C") +
+  
+  labs(title = 'Resale Prices by Planning Area in 2022, Month: {frame_time}') +
+  transition_time(sg_re_price_2022_v1$Month) +
+  ease_aes('linear')
+```
+:::
+
+### 4.1.3 Median income by planning areas
+
+Creating two new datasets:
+
+1.  a\) **median_priceK** (median resale price in thousands) by planning area
+
+    b\) **median_price**\_psm (median resale price psm) by planning area
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+sg_re_price_2022_median_priceK <- sg_re_price_2022_v1 %>% 
+  group_by(town) %>% 
+  summarise(median_priceK = median(priceK, na.rm = TRUE))
+
+sg_re_price_2022_median_price_psm <- sg_re_price_2022_v1 %>% 
+  group_by(town) %>% 
+  summarise(median_price_psm = median(price_psm, na.rm = TRUE))
+```
+
+Combining the two datasets
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+sg_re_price_2022_comb <- left_join(sg_re_price_2022_median_priceK, sg_re_price_2022_median_price_psm, by = c("town" = "town"))
+```
+
+Creating a combined chart to compare median price and median price per psm by planning area
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+# see if you can modify tooltip
+
+scale = 10
+
+PA <- ggplot(sg_re_price_2022_comb, aes(x = reorder(town, median_priceK))) +
+  
+  geom_bar(aes(x = reorder(town, median_priceK), y = median_priceK), stat = "identity", fill = "#d4ad44") +
+  
+  geom_point(aes(y = median_price_psm/scale), color = "#1d5a6b", size = 2) +
+  
+  scale_y_continuous(sec.axis = sec_axis(~.*scale, name="Price ($)")) + 
+  
+ labs( title = "Median Price and Price psm by Planning area",
+       x = "Planning Area",
+       y = "Median Price/Price psm") +
+  
+  coord_flip() + 
+
+theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.4, size = 12, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = "none",
+        
+        panel.background = element_rect(fill = 'white'),
+        panel.grid.major = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_line(linewidth = 0.25, linetype = 'dashed', colour = '#bebebe'),
+        
+        axis.text = element_text(size = 8, face = "bold"),
+        axis.title = element_text(hjust = 0.5, size = 12, face = "bold"))
+
+
+ggplotly(PA, tooltip = "text")
+```
+
+\<some explanation\>
+
+## 4.3 Flat type comparison by planning area
+
+### 4.3.1 Proportion of Flat types by Planning area in Singapore
+
+::: panel-tabset
+## Plot
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+prop_sg <- sg_re_price_2022_v1%>%
+group_by(town, flat_type) %>%
+summarize(ft_count = n())%>%
+mutate(ft_pct = scales::percent(ft_count/sum(ft_count)))
+
+prop <- ggplot(prop_sg, 
+                aes(town, ft_count, fill = flat_type)) + 
+  geom_bar(stat="identity") +
+
+  labs(title = "Proportion of Flat types by Planning area in Singapore", x = "Planning Area", y = "Count", fill = "Flat Type") +
+  
+  theme_minimal() +
+  
+  scale_fill_viridis(discrete = T, option = "E") +
+  
+  theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.6, size = 15, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = "bottom",
+        axis.text = element_text(size = 8, face = "bold"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.title.x = element_text(hjust = 0.5, size = 12, face = "bold"),
+        axis.title.y = element_text(hjust = 0.5, size = 12, face = "bold"))
+
+ggplotly(prop)
+```
+
+## Data
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+prop_sg <- sg_re_price_2022_v1%>%
+group_by(town, flat_type) %>%
+summarize(ft_count = n())%>%
+mutate(ft_pct = scales::percent(ft_count/sum(ft_count)))
+
+prop_sg
+```
+:::
+
+### 4.3.2 Resale prices of different flat types by planning area
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+#have to change theme and everything else
+
+p <- ggplot(data = sg_re_price_2022_v1, aes(x = town, y = priceK)) +
+  
+  geom_boxplot(aes(fill = as.factor(flat_type))) +
+  
+  theme_minimal() +
+  
+  scale_fill_brewer(palette = "Dark2") +
+
+ labs( title = "Resale prices in Thousands in 2022 by planning area",
+       fill = "Flat Type",
+       y = "Resale price (1000s)",
+       x = "Planning Area") +
+
+theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.2, size = 12, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = "bottom",
+        
+        axis.text = element_text(size = 8, face = "bold"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.title.x = element_text(hjust = 0.5, size = 12, face = "bold", color = "#899499"),
+        axis.title.y = element_text(hjust = 0.5, size = 12, face = "bold", color = "#899499"))
+
+ggplotly(p)
+```
+
+```{r}
+areas = unique(sg_re_price_2022_v1$town)
+PA = c()
+min_price = c()
+max_price = c()
+
+for(area in areas){
+  df <- sg_re_price_2022_v1[sg_re_price_2022_v1$town == area,]
+  PA = c(PA, area)
+  min_price = c(min_price, min(df$priceK))
+  max_price = c(max_price, max(df$priceK))
+}
+
+df <- data.frame("Planning_Area" = PA, "Min_Price" = min_price, "Max_Price" = max_price, check.names=FALSE)
+
+```
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+dumbell <- plot_ly(df) %>% 
+ add_segments(x = ~Min_Price, xend = ~Max_Price, y = ~Planning_Area, yend = ~Planning_Area, showlegend = FALSE) %>% 
+ add_markers(x = ~Min_Price, y = ~Planning_Area, name = "Min", color = I("#e66819")) %>% 
+ add_markers(x = ~Max_Price, y = ~Planning_Area, name = "Max", color = I("#bf0d31")) %>% 
+ layout(
+    title = "Resale Price in 1000s Difference Across Planning Areas",
+    xaxis = list(title = "Resale Price in 1000s"),
+    yaxis = list(title = "Planning Area"),
+    margin = list(l = 70)
+  )
+dumbell
+```
+
+## 4.2 Area & Age by Flat Type
+
+### 4.2.1 Correlation for Area, Age with Resale Price
+
+::: panel-tabset
+## Area Correlation
+
+```{r}
+#| code-fold: true
+
+ggscatterstats(
+ data = sg_re_price_2022_v1,
+x = floor_area_sqm,
+y = priceK,
+marginal = FALSE) +
+  
+  theme_minimal() +
+  
+  labs(title = 'Correlation of resale price (in 000s) and floor area (sqm)', x = "Floor Area", y = "Resale Price in 000s") +
+
+theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.2, size = 15, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = "bottom",
+        
+        axis.text = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"))
+
+```
+
+## Age Correlation
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+ggscatterstats(
+ data = sg_re_price_2022_v1,
+x = property_age,
+y = priceK,
+marginal = FALSE) +
+  
+  theme_minimal() +
+  
+  labs(title = 'Correlation of resale price (in 000s) and floor area (sqm)', x = "Floor Area", y = "Resale Price in 000s") +
+
+theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.2, size = 15, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        legend.position = "bottom",
+        
+        axis.text = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"))
+
+
+```
+:::
+
+### 4.2.2 Treemap for Age and Area
+
+::: panel-tabset
+## Area Treemap
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+treemap_area <- treemap (sg_re_price_2022_v1,
+        index= c("flat_type", "town"),
+        vSize= "floor_area_sqm",
+        vColor = "priceK",
+        type="manual",
+        palette = mako(5),
+        border.col = c("black", "white"),
+        title="Properties for resale",
+        title.legend = "Median Price (1000s)"
+        )
+```
+
+## Age Treemap
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+treemap_age <- treemap (sg_re_price_2022_v1,
+        index= c("flat_type", "town"),
+        vSize= "property_age",
+        vColor = "priceK",
+        type="manual",
+        palette = "Blues",
+        title="Properties for resale",
+        title.legend = "Median Price (1000s)"
+        )
+```
+:::
+
+# X. References
+
+1.  \[How to remove Outliers\](https://universeofdatascience.com/how-to-remove-outliers-from-data-in-r/#:\~:text=Firstly%2C%20we%20find%20first%20(Q1,()%20function%20to%20remove%20outliers. "Outliers in R")?
+2.  https://statisticsglobe.com/plotly-boxplot-r
+3.  https://statisticsglobe.com/change-colors-plotly-graph-r - change color inside
+4.  https://plotly.com/r/figure-labels/
+5.  https://r-graph-gallery.com/237-interactive-treemap.html
+6.  https://stackoverflow.com/questions/37817809/r-ggplot-stacked-bar-chart-with-counts-on-y-axis-but-percentage-as-label
