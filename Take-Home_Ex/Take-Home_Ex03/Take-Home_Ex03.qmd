@@ -25,7 +25,7 @@ For the purpose of this study, the focus should be on **3-ROOM, 4-ROOM and 5-ROO
 The data used is '*Resale flat princes based on registration date from Jan-2017 onwards',* which was obtained from [Data.gov.sg](https://data.gov.sg/). The data has 147601 rows and 11 columns.
 
 | Columns             | Description                                           |
-|---------------------|---------------------------------------------------|
+|---------------------|-------------------------------------------------------|
 | month               | Month and year of listing                             |
 | town                | Planning area in Singapore                            |
 | flat_type           | Type of flats available - 1 room, 2 room, 3 room, etc |
@@ -56,7 +56,7 @@ sg_re_price <- read_csv("data/resale_flat_prices.csv")
 ## 3.3 Data Prep
 
 | Issues        | Description                                                                                                                                                                  | Resolution                                                                                                                |
-|--------------|-----------------------------------|------------------------|
+|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
 | Outliers      | The resale price has outliers where the price goes up 141800. The top 10% of resale price are outliers.                                                                      | Outliers should be excluded from the data. Anything falling above the 3rd quartile is filtered out from the data. (3.3.4) |
 | Variable type | Date is available in the form of 'YYYY - MM' which is not readable in R                                                                                                      | Format date, seperate month into month and year. (3.3.1)                                                                  |
 | New variables | Lease start date and lease years cannot be used for analysis. Additionally, floor area and reslae price can be used to calculate price per square meter to enhance analysis. | price_psm, priceK and property age are calculated. (3.3.2)                                                                |
@@ -286,6 +286,10 @@ ggplot(data = sg_re_price_flat, aes(x = priceK, y = flat_type, fill = after_stat
   
   theme_minimal() +
   
+    labs(title = 'Resale Prices by Flat Type: {frame_time}',
+       y = "Resale Price in Thousands (SGD)",
+       x = "Flat Type") +
+  
   theme(legend.position="none",
   text = element_text(family = "Garamond"),
   plot.title = element_text(face = "bold", size = 12),
@@ -294,11 +298,8 @@ ggplot(data = sg_re_price_flat, aes(x = priceK, y = flat_type, fill = after_stat
   axis.title.y = element_text(size = 10),
   axis.text = element_text(size = 8)) +
   
-  scale_fill_viridis(name = "priceK", option = "C") +
-  
-  labs(title = 'Resale Prices by Flat Type: {frame_time}',
-       y = "Resale Price in Thousands (SGD)",
-       x = "Flat Type") +
+  scale_fill_viridis(name = "priceK", option = "D") +
+
   transition_time(sg_re_price_flat$Year) +
   ease_aes('linear')
 ```
@@ -314,6 +315,10 @@ ggplot(data = sg_re_price_2022_v1, aes(x = priceK, y = flat_type, fill = after_s
   
   theme_minimal() +
   
+    labs(title = 'Resale Prices by Flat Type in 2022, Month: {frame_time}',
+       x = "Flat Type",
+       y = "Resale Price in Thousands (SGD)") +
+  
   theme(legend.position="none",
   text = element_text(family = "Garamond"),
   plot.title = element_text(face = "bold", size = 12),
@@ -322,11 +327,8 @@ ggplot(data = sg_re_price_2022_v1, aes(x = priceK, y = flat_type, fill = after_s
   axis.title.y = element_text(size = 10),
   axis.text = element_text(size = 8)) +
   
-  scale_fill_viridis(name = "priceK", option = "C") +
+  scale_fill_viridis(name = "priceK", option = "D") +
   
-  labs(title = 'Resale Prices by Flat Type in 2022, Month: {frame_time}',
-       x = "Flat Type",
-       y = "Resale Price in Thousands (SGD)") +
   transition_time(sg_re_price_2022_v1$Month) +
   ease_aes('linear')
 ```
@@ -551,6 +553,9 @@ ggplot(data = sg_re_price, aes(x = priceK, y = town, fill = after_stat(x))) +
   geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
   
   theme_minimal() +
+    
+  labs(title = 'Resale Prices by Planning Area: {frame_time}') +
+  transition_time(sg_re_price$Year) +
   
   theme(legend.position="none",
   text = element_text(family = "Garamond"),
@@ -560,10 +565,8 @@ ggplot(data = sg_re_price, aes(x = priceK, y = town, fill = after_stat(x))) +
   axis.title.y = element_text(size = 10, angle = 360),
   axis.text = element_text(size = 8)) +
   
-  scale_fill_viridis(name = "priceK", option = "C") +
-  
-  labs(title = 'Resale Prices by Planning Area: {frame_time}') +
-  transition_time(sg_re_price$Year) +
+  scale_fill_viridis(name = "priceK", option = "D") +
+
   ease_aes('linear')
 ```
 
@@ -577,6 +580,8 @@ ggplot(data = sg_re_price_2022_v1, aes(x = priceK, y = town, fill = after_stat(x
   
   theme_minimal() +
   
+  labs(title = 'Resale Prices by Planning Area in 2022, Month: {frame_time}') +
+  
   theme(legend.position="none",
   text = element_text(family = "Garamond"),
   plot.title = element_text(face = "bold", size = 12),
@@ -585,9 +590,8 @@ ggplot(data = sg_re_price_2022_v1, aes(x = priceK, y = town, fill = after_stat(x
   axis.title.y = element_text(size = 10, angle = 360),
   axis.text = element_text(size = 8)) +
   
-  scale_fill_viridis(name = "priceK", option = "C") +
+  scale_fill_viridis(name = "priceK", option = "D") +
   
-  labs(title = 'Resale Prices by Planning Area in 2022, Month: {frame_time}') +
   transition_time(sg_re_price_2022_v1$Month) +
   ease_aes('linear')
 ```
@@ -601,7 +605,7 @@ We now look into the proportion of flat types by planning areas. We observe that
 
 1.  Toa Payoh, Ang Mo Kio, Bedok, Central Area have the highest proprtion of 3-room flats, whereas Bukit Timah and Paris Ris have the least.
 2.  Yishun, Woodlands, Serangoon have the highest proportion of 4-room flats.
-3.   Sengkang, Punggol have the highest proportion of 5-room flats.
+3.  Sengkang, Punggol have the highest proportion of 5-room flats.
 
 ::: panel-tabset
 ## Plot
@@ -834,3 +838,4 @@ treemap_age <- treemap (sg_re_price_2022_v1,
 6.  McLeod, Saul, 'What does a boxplot tell you?', 'Simply Psychology', 2019 ([link](https://www.simplypsychology.org/boxplots.html#:~:text=The%20box%20plot%20shape%20will,then%20the%20distribution%20is%20symmetric.))
 7.  Wenyi, Wang, 'An analysis of Singapore property resale market price based on transaction from 2017 to 2019', July 17, 2020 ([link](https://rpubs.com/Wang_Wenyi/640078))
 8.  Qingquan, XIA, 'Assignment 5', 'RPubs', August, 2020 ([link](https://rpubs.com/x769820941/assignment-5))
+9.  TS Kam, 'Hands-on Exercise 8: Treemap Visualisation with R', July, 2019, ([link](https://rpubs.com/tskam/treemap))
