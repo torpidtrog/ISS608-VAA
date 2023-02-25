@@ -1,0 +1,68 @@
+---
+title: "Take-Home_Ex04"
+author: "Aishwarya Maloo"
+format: html
+date: "14 February 2023"
+date-modified: "`r Sys.Date()`"
+execute:
+  echo: true
+  eval: true
+  warning: false
+editor: visual
+---
+
+# 1. The Task
+
+# 2. Description of the dataset
+
+# 3. Data Wrangling and Preparation
+
+## 3.1 Installing R Packages
+
+```{r, message = FALSE, warning = FALSE}
+pacman::p_load(ggstatsplot, ggthemes, plotly, corrplot, lubridate, ggpubr, plotly, treemap, d3treeR, hrbrthemes, ggrepel, RColorBrewer, gganimate, viridis, ggridges, ggrepel, testthat, hmisc, reshape2, tidyverse)
+```
+
+## 3.2 Loading the datasets
+
+```{r, message = FALSE, warning = FALSE}
+
+imports_df <- read_csv("data/imports.csv")
+exports_df <- read_csv("data/exports.csv")
+```
+
+```{r}
+#Pivoting the data in R
+imports_df_long <- imports_df %>%
+  pivot_longer(cols = -Country, names_to = "date", values_to = "import")
+
+exports_df_long <- exports_df %>%
+  pivot_longer(cols = -Country, names_to = "date", values_to = "export")
+```
+
+```{r}
+# Combine the two datasets by country and month
+merged_df_long <- merge(imports_df_long, exports_df_long, by = c("Country", "date"))
+```
+
+```{r}
+#Separating out the month and year
+# merged_df_long$year <- paste0("20", substr(merged_df_long$date, 5, 6))
+# merged_df_long$month <- substr(merged_df_long$date, 1, 3)
+```
+
+```{r}
+#creating trade balance column
+merged_df_long$trade_balance <- merged_df_long$export - merged_df_long$import
+```
+
+```{r}
+class(merged_df_long$date)
+```
+
+```{r}
+merged_df_long <- merged_df_long %>% 
+  mutate(date = as.Date(date, format = "%d/%m/%Y"))
+```
+
+# 4. Data Visualisation
