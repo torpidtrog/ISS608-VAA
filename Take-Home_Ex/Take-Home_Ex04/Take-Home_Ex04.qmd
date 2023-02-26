@@ -13,25 +13,42 @@ editor: visual
 
 # 1. The Task
 
+In this take-home exercise, we are required to uncover the impact of COVID-19 as well as the global economic and political dynamic from Jan 2020 to Dec 2022 on Singapore bi-lateral trade (i.e. Import, Export and Trade Balance) by using appropriate analytical visualisation techniques learned in **Lesson 6: It's About Time**. The focus needs to be on six countries of one's choice.
+
 # 2. Description of the dataset
+
+The data is obtained from Department of Statistics. The data is available under the sub-section of [Merchandise Trade by Region/Market](https://tablebuilder.singstat.gov.sg/table/TS/M450081).
+
+The data for imports and exports comprises of the country level imports/exports with Singapore upto Jan 2023.
 
 # 3. Data Wrangling and Preparation
 
 ## 3.1 Installing R Packages
 
 ```{r, message = FALSE, warning = FALSE}
-pacman::p_load(ggstatsplot, ggthemes, plotly, corrplot, lubridate, ggpubr, plotly, treemap, d3treeR, hrbrthemes, ggrepel, RColorBrewer, gganimate, viridis, ggridges, ggrepel, testthat, hmisc, reshape2, tidyverse)
+#| code-fold: true
+
+pacman::p_load(ggstatsplot, ggthemes, plotly, lubridate, ggpubr, plotly,hrbrthemes, ggrepel, RColorBrewer, gganimate, viridis, ggridges, ggrepel, testthat, hmisc, reshape2, zoo, gridExtra, GGally, patchwork, ggstream, magrittr, bbplot, janitor, magrittr, ggflags, countrycode, ggbraid, tidyverse)
 ```
 
-## 3.2 Loading the datasets
+## 3.2 Loading the data
 
-```{r, message = FALSE, warning = FALSE}
+The dataset given was in excel, the imports and exports sheet were placed into separate csv files for ease of reading and wrangling data in R.
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
 
 imports_df <- read_csv("data/imports.csv")
 exports_df <- read_csv("data/exports.csv")
 ```
 
-```{r}
+## 3.3 Data Wrangling
+
+The data is short and fat, for ease of visualisation, the data is converted to long and narrow format. For this, we use 'pivot_longer' function.
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
 #Pivoting the data in R
 imports_df_long <- imports_df %>%
   pivot_longer(cols = -Country, names_to = "date", values_to = "import")
@@ -40,29 +57,844 @@ exports_df_long <- exports_df %>%
   pivot_longer(cols = -Country, names_to = "date", values_to = "export")
 ```
 
-```{r}
+Merging the import and export dataframes
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
 # Combine the two datasets by country and month
-merged_df_long <- merge(imports_df_long, exports_df_long, by = c("Country", "date"))
+
+merged_df_long <- full_join(imports_df_long, exports_df_long, by = c("Country", "date"))
 ```
 
-```{r}
-#Separating out the month and year
-# merged_df_long$year <- paste0("20", substr(merged_df_long$date, 5, 6))
-# merged_df_long$month <- substr(merged_df_long$date, 1, 3)
+Creating a column to calculate the trade balance (exports - imports).
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+merged_df_long[is.na(merged_df_long)] <- 0
 ```
 
-```{r}
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
 #creating trade balance column
 merged_df_long$trade_balance <- merged_df_long$export - merged_df_long$import
 ```
 
-```{r}
+Converting the date from character type to the desired date format and creating a column for month and year.
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+merged_df_long$date <- ydm(merged_df_long$date)
+```
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+merged_df_long$month <- month(merged_df_long$date)
+merged_df_long$year <- year(merged_df_long$date)
+```
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+merged_df_long <- merged_df_long %>% mutate(formatted_date = format(date, "%b %y"))
+```
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
 class(merged_df_long$date)
 ```
 
-```{r}
-merged_df_long <- merged_df_long %>% 
-  mutate(date = as.Date(date, format = "%d/%m/%Y"))
+Creating a separate column called category to condense the trade type into one column
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+#Reshaping the data into long format, again
+df_long <- gather(merged_df_long, key = "type", value = "value", import:trade_balance)
 ```
 
-# 4. Data Visualisation
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+# df_long <- df_long %>%
+df_long <- df_long %>%
+  mutate(category = case_when(
+    type == "import" ~ "Import",
+    type == "export" ~ "Export",
+    type == "trade_balance" ~ "Trade Balance"
+  ))
+```
+
+## 3.4 Selection of Countries
+
+To narrow down the search for selection of countries, two factors were taken into consideration:
+
+1.  Geographical proximity: countries closer to Singapore are likely to have strong trade relations with Singapore and can have a sizeable impact on Singapore's trade balance
+2.  [Economic size and significance](https://www.worlddata.info/largest-economies.php): countries with greater economic significance can help provide a holistic picture of Singapore's trade balances and can potentially help identify the key trading partners.
+
+On the basis of the above factors, the countries chosen are United States, China, Japan, Germany, India and United Kingdom
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+filtered_countries <-  c("United States", "United Kingdom", "Mainland China", "India",   "Germany, Federal Republic Of", "Japan")
+```
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+merged_df_long_six <- filter(merged_df_long, (Country %in% filtered_countries))
+```
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+df_long_six <- filter(df_long, (Country %in% filtered_countries))
+```
+
+Changing the name of "Germany, Federal Republic Of" to "Germany" and "Mainland China" to "China"
+
+```{r, message = FALSE, warning = FALSE, output = FALSE}
+#| code-fold: true
+
+merged_df_long_six$Country <- ifelse(grepl("Mainland China", merged_df_long_six$Country), "China", merged_df_long_six$Country)
+
+merged_df_long_six$Country <- ifelse(grepl("Germany, Federal Republic Of", merged_df_long_six$Country), "Germany", merged_df_long_six$Country)
+
+df_long_six$Country <- ifelse(grepl("Mainland China", df_long_six$Country), "China", df_long_six$Country)
+
+df_long_six$Country <- ifelse(grepl("Germany, Federal Republic Of", df_long_six$Country), "Germany", df_long_six$Country)
+```
+
+# 4. Data Visualization
+
+## 4.1 Singapore's Trade Overview
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+df_long_imex <- df_long %>% 
+  filter(category == c("Import", "Export"))
+
+myColours <- c("#A6611A","#80CDC1")
+
+plot1 <- ggplot(data = df_long_imex, aes(x = date, y = value, colour = category)) +
+  
+  geom_line(data = df_long_imex %>% filter(category == "Import") %>% filter(Country == "Total Merchandise Imports"), size = 1.25) + 
+  
+  geom_line(data = df_long_imex %>% filter(category == "Export") %>% filter(Country == "Total Merchandise Exports"), size = 1.25) + 
+  
+  # scale_y_continuous(labels = scales::comma) +
+  
+  scale_y_continuous(breaks = seq(3e+07,7e+07,1e+07), labels = c("30", "40", "50", "60", "70")) +
+  
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
+  
+  labs(title = "Imports and Exports of Singapore from 2020 to 2022",
+       x = "Time", y = "Value in Millions", caption = "Source: Merchandise Trade by Region, Singstat") + 
+  
+  scale_color_manual(values = myColours) + 
+  
+  theme_wsj(base_size = 15) + 
+  
+  theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.2, size = 12, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        
+        legend.position = c(0.85, 0.20),
+        legend.title = element_blank(),
+        legend.background = element_blank(),
+        
+        plot.caption = element_text(hjust = 1, size = 8, face = 'italic'),
+        
+        axis.ticks.y = element_line(color = 'black'),
+        axis.ticks.x = element_line(color = 'black'),
+        
+        axis.text = element_text(size = 8, face = "bold"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.title.x = element_text(hjust = 0.5, size = 12, face = "bold"),
+        axis.title.y = element_text(hjust = 0.5, size = 12, face = "bold"),
+        
+        panel.background = element_rect(fill = 'white'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank())
+```
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+ggplotly(plot1)
+```
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+# Get trade balance from Subtracting imports and exports
+trade_balance_SG <- merged_df_long %>%
+  group_by(date) %>%
+  summarise(TradeBalance = sum(trade_balance[Country == "Total Merchandise Exports"]) + sum(trade_balance[Country == "Total Merchandise Imports"]))
+
+plot2 <- ggplot(data = trade_balance_SG, aes(x = date, y = TradeBalance)) +
+  
+  geom_line(size = 1.25) + 
+
+  scale_y_continuous(breaks = seq(0,8e+06,1e+06), labels = c("0","10","20","30", "40", "50", "60", "70", "80")) +
+  
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
+  
+  labs(title = "Trade Balance of Singapore from 2020 to 2022",
+       x = "Time", y = "Value in Millions", caption = "Source: Merchandise Trade by Region, Singstat") + 
+  
+  scale_color_wsj() + 
+  
+  theme_wsj(base_size = 15) + 
+  
+  theme(text = element_text(family = "Garamond"),
+        plot.title = element_text(hjust = 0.2, size = 12, face = 'bold'),
+        plot.margin = margin(20, 20, 20, 20),
+        plot.caption = element_text(hjust = 1, size = 8, face = 'italic'),
+        
+        axis.ticks.y = element_line(color = 'black'),
+        axis.ticks.x = element_line(color = 'black'),
+        
+        axis.text = element_text(size = 8, face = "bold"),
+        axis.line = element_line(color = "black"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        axis.title.x = element_text(hjust = 0.5, size = 12, face = "bold"),
+        axis.title.y = element_text(hjust = 0.5, size = 12, face = "bold"),
+        
+        panel.background = element_rect(fill = 'white'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank())
+```
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+ggplotly(plot2)
+```
+
+Covid hit the world in December, 2019 and its effects were visible from 2020 beginning. Despite, the adverse effects of covid, Singapore maintained a trade surplus throughout the period of January 2020 to December 2022 i.e. it was exporting more than importing. This is indicative of a sign of competitiveness in the global market. January 2020, May 2022 and August 2022 recorded the lowest trade surplus over the years.
+
+## 4.2 Distribution of Imports/Exports over the years by Country
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+#filter for imports
+imports_six <- df_long_six %>% filter(category == "Import")
+
+#filter for exports
+exports_six <- df_long_six %>% filter(category == "Export")
+```
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+imports_six$year <- as.integer(imports_six$year)
+
+exports_six$year <- as.integer(exports_six$year)
+```
+
+::: panel-tabset
+## Imports
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+ggplot(data = imports_six, aes(x = value, y = Country, fill = after_stat(x))) +
+  
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  
+  theme_wsj() +
+  
+    labs(title = 'Imports from: {frame_time}',
+       y = "Value in Millions (SGD)",
+       x = "Country") +
+  
+  theme(legend.position="none",
+  text = element_text(family = "Garamond"),
+  plot.title = element_text(face = "bold", size = 12),
+  
+  axis.title.x = element_text(size = 16, hjust = 1),
+  axis.title.y = element_text(size = 14),
+  axis.text = element_text(size = 12)) +
+  
+  scale_fill_viridis(name = "value", option = "D") +
+
+  transition_time(imports_six$year) +
+  
+  ease_aes('linear')
+
+```
+
+## Exports
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+ggplot(data = exports_six, aes(x = value, y = Country, fill = after_stat(x))) +
+  
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01) +
+  
+  theme_wsj() +
+  
+    labs(title = 'Exports from: {frame_time}',
+       y = "Value in Millions (SGD)",
+       x = "Country") +
+  
+  theme(legend.position="none",
+  text = element_text(family = "Garamond"),
+  plot.title = element_text(face = "bold", size = 12),
+  
+  axis.title.x = element_text(size = 16, hjust = 1),
+  axis.title.y = element_text(size = 14),
+  axis.text = element_text(size = 12)) +
+  
+  scale_fill_viridis(name = "value", option = "D") +
+
+  transition_time(exports_six$year) +
+  
+  ease_aes('linear')
+
+```
+:::
+
+There has been a gradual increase in imports over the years for all the six countries. United Kingdom, Germany and India have a narrow and long ridgeline plot. United States and China have irregular shaped ridgeline plots with marked fluctuations over the years. For Japan, the ridgeline plot starts out tall and narrow, then shortens in 2021 and then becomes taller again in 2022. This could have been owing to reduced demand by Singapore during late 2020.
+
+Similarly, for exports, United Kingdom, Germany and India have a narrow and long ridgeline plot. United States and China have irregular shaped ridgeline plots with marked fluctuations over the years. For Japan, the narrow ridgeline plot shrinks towards the end of 2020 and in 2021 and then becomes long and narrow again. United Kingdom has a long and narrow plot to begin with but over the years, the peak gets longer and narrower.
+
+## 4.3 Singapore's bilateral trade
+
+::: panel-tabset
+## United States
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+
+p1 <- ggplot() +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "United Kingdom", category == "Import")) +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "United Kingdom", category == "Export")) +
+
+    geom_braid(aes(date, ymin = import, ymax = export, fill = import < export), data = merged_df_long %>% filter(Country == "United Kingdom")) +
+
+  guides(linetype = "none") +
+  
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
+
+  scale_y_continuous(breaks = seq(0 ,1500000, 300000), labels = c("0","300","600","900", "1200", "1500")) +
+  
+  labs(title = "Singapore - USA Trade Balance", x = "Date", y = "Value in Thousands SGD", caption = "Source: Merchandise Trade by Region, Singstat") +
+
+  theme_wsj() +
+
+  scale_fill_manual(values = c("#63803e", "#0e2e47"), name = "Trade Balance", labels = c("Deficit", "Surplus")) +
+
+  theme(
+        plot.margin = margin(t=1, r=1, b=1, l=1),
+        plot.title = element_text(size = 15, face = 'bold', hjust = 0.5),
+        plot.caption = element_text(hjust = 1, face = 'italic', size = 8),
+        legend.position = 'bottom',
+
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+
+        axis.line = element_line(color = 'grey'),
+        axis.title = element_text(size = 10),
+        axis.title.y = element_text(angle = 90, vjust = 1.03),
+        axis.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 90),
+
+        axis.ticks.y = element_line(color = 'grey'),
+        axis.ticks.x = element_line('grey'),
+
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8))
+
+p1
+
+```
+
+## China
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+p2 <- ggplot() +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "China", category == "Import")) +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "China", category == "Export")) +
+
+    geom_braid(aes(date, ymin = import, ymax = export, fill = import < export), data = merged_df_long %>% filter(Country == "China")) +
+
+  guides(linetype = "none") +
+  
+   scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
+
+   scale_y_continuous(breaks = seq(3000000,10000000,1000000), labels = c("3","4","5","6", "7", "8", "9", "10")) +
+  
+  labs(title = "Singapore-USA trade balance", x = "Date", y = "Value in Millions SGD", caption = "Source: Merchandise Trade by Region, Singstat") +
+
+  theme_wsj() +
+
+  scale_fill_manual(values = c("#63803e", "#0e2e47"), name = "Trade Balance", labels = c("Deficit", "Surplus")) +
+
+  theme(
+        plot.margin = margin(t=1, r=1, b=1, l=1),
+        plot.title = element_text(size = 15, face = 'bold', hjust = 0.5),
+        plot.caption = element_text(hjust = 1, face = 'italic', size = 8),
+        legend.position = 'bottom',
+
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+
+        axis.line = element_line(color = 'grey'),
+        axis.title = element_text(size = 10),
+        axis.title.y = element_text(angle = 90, vjust = 1.03),
+        axis.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 90),
+
+        axis.ticks.y = element_line(color = 'grey'),
+        axis.ticks.x = element_line('grey'),
+
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8))
+
+
+p2
+
+```
+
+## Japan
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+p3 <- ggplot() +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "Japan", category == "Import")) +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "Japan", category == "Export")) +
+
+    geom_braid(aes(date, ymin = import, ymax = export, fill = import < export), data = merged_df_long %>% filter(Country == "Japan")) +
+
+  guides(linetype = "none") +
+  
+   scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
+
+  scale_y_continuous(breaks = seq(0,4000000,500000), labels = c("0","5","10","15", "20", "25", "30", "35", "40")) +
+  
+  labs(title = "Singapore - Japan trade balance", x = "Date", y = "Value in Thousands SGD", caption = "Source: Merchandise Trade by Region, Singstat") +
+
+  theme_wsj() +
+
+  scale_fill_manual(values = c("#63803e", "#0e2e47"), name = "Trade Balance", labels = c("Deficit", "Surplus")) +
+
+  theme(
+        plot.margin = margin(t=1, r=1, b=1, l=1),
+        plot.title = element_text(size = 15, face = 'bold', hjust = 0.5),
+        plot.caption = element_text(hjust = 1, face = 'italic', size = 8),
+        legend.position = 'bottom',
+
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+
+        axis.line = element_line(color = 'grey'),
+        axis.title = element_text(size = 10),
+        axis.title.y = element_text(angle = 90, vjust = 1.03),
+        axis.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 90),
+
+        axis.ticks.y = element_line(color = 'grey'),
+        axis.ticks.x = element_line('grey'),
+
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8))
+
+p3
+```
+
+## Germany
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+p4 <- ggplot() +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "Germany", category == "Import")) +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "Germany", category == "Export")) +
+
+    geom_braid(aes(date, ymin = import, ymax = export, fill = import < export), data = merged_df_long %>% filter(Country == "Germany")) +
+
+  guides(linetype = "none") +
+  
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
+
+scale_y_continuous(breaks = seq(0,1500000,250000), labels = c("0","25","50","75", "100", "125", "150")) +
+  
+  labs(title = "Singapore - Germany trade balance", x = "Date", y = "Value in Thousands SGD", caption = "Source: Merchandise Trade by Region, Singstat") +
+
+  theme_wsj() +
+
+  scale_fill_manual(values = c("#63803e", "#0e2e47"), name = "Trade Balance", labels = c("Deficit", "Surplus")) +
+  
+    theme(
+        plot.margin = margin(t=1, r=1, b=1, l=1),
+        plot.title = element_text(size = 15, face = 'bold', hjust = 0.5),
+        plot.caption = element_text(hjust = 1, face = 'italic', size = 8),
+        legend.position = 'bottom',
+
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+
+        axis.line = element_line(color = 'grey'),
+        axis.title = element_text(size = 10),
+        axis.title.y = element_text(angle = 90, vjust = 1.03),
+        axis.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 90),
+
+        axis.ticks.y = element_line(color = 'grey'),
+        axis.ticks.x = element_line('grey'),
+
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8))
+
+
+
+p4
+```
+
+## United Kingdom
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+p5 <- ggplot() +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "United Kingdom", category == "Import")) +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "United Kingdom", category == "Export")) +
+
+    geom_braid(aes(date, ymin = import, ymax = export, fill = import < export), data = merged_df_long %>% filter(Country == "United Kingdom")) +
+
+  guides(linetype = "none") +
+  
+  scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
+
+ scale_y_continuous(breaks = seq(0,1500000, 250000), labels = c("0","25","50","75", "100", "125", "150")) +
+  
+  labs(title = "Singapore - United Kingdom trade balance", x = "Date", y = "Value in Thousands SGD", caption = "Source: Merchandise Trade by Region, Singstat") +
+
+  theme_wsj() +
+
+  scale_fill_manual(values = c("#63803e", "#0e2e47"), name = "Trade Balance", labels = c("Deficit", "Surplus")) +
+
+    theme(
+        plot.margin = margin(t=1, r=1, b=1, l=1),
+        plot.title = element_text(size = 15, face = 'bold', hjust = 0.5),
+        plot.caption = element_text(hjust = 1, face = 'italic', size = 8),
+        legend.position = 'bottom',
+
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+
+        axis.line = element_line(color = 'grey'),
+        axis.title = element_text(size = 10),
+        axis.title.y = element_text(angle = 90, vjust = 1.03),
+        axis.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 90),
+
+        axis.ticks.y = element_line(color = 'grey'),
+        axis.ticks.x = element_line('grey'),
+
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8))
+
+p5
+```
+
+## India
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+p6 <- ggplot() +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "India", category == "Import")) +
+
+  geom_line(aes(x = date, y = value, linetype = category), data = df_long_six %>% filter(Country == "India", category == "Export")) +
+
+    geom_braid(aes(date, ymin = import, ymax = export, fill = import < export), data = merged_df_long %>% filter(Country == "India")) +
+
+  guides(linetype = "none") +
+
+ scale_y_continuous(breaks = seq(0,2000000,500000), labels = c("0","50","100","150", "200")) +
+  
+  labs(title = "Singapore - India trade balance", x = "Date", y = "Value in Thousands SGD", caption = "Source: Merchandise Trade by Region, Singstat") +
+
+  theme_wsj() +
+
+  scale_fill_manual(values = c("#63803e", "#0e2e47"), name = "Trade Balance", labels = c("Deficit", "Surplus")) +
+
+    theme(
+        plot.margin = margin(t=1, r=1, b=1, l=1),
+        plot.title = element_text(size = 15, face = 'bold', hjust = 0.5),
+        plot.caption = element_text(hjust = 1, face = 'italic', size = 8),
+        legend.position = 'bottom',
+
+        panel.grid.major.y = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+
+        axis.line = element_line(color = 'grey'),
+        axis.title = element_text(size = 10),
+        axis.title.y = element_text(angle = 90, vjust = 1.03),
+        axis.text = element_text(size = 8),
+        axis.text.x = element_text(angle = 90),
+
+        axis.ticks.y = element_line(color = 'grey'),
+        axis.ticks.x = element_line('grey'),
+
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8))
+
+p6
+```
+:::
+
+Singapore's trade relations with economically large and significant country indicates that it is largely an importer of products from these countries than an exporter. It does volume importing and exporting with China, with their trade deficit and surplus oscillating over the periods. With India, United States and United Kingdom, a large trade deficit gap is observed in comparison to Japan and Germany
+
+## 4.4 Proportion of bilateral trades
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+#different years
+year2020 <- df_long_six %>% filter(year == "2020", category == c("Import", "Export"))
+year2021 <- df_long_six %>% filter(year == "2021", category == c("Import", "Export"))
+year2022 <- df_long_six %>% filter(year == "2022", category == c("Import", "Export"))
+```
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+# calculate total value by country and type
+df_sum2020 <- aggregate(value ~ Country + category, data = year2020, sum)
+df_sum2021 <- aggregate(value ~ Country + category, data = year2021, sum)
+df_sum2022 <- aggregate(value ~ Country + category, data = year2022, sum)
+
+# calculate proportion of value by country and type
+df_sum2020$prop <- df_sum2020$value / tapply(df_sum2020$value, df_sum2020$Country, sum)[df_sum2020$Country]
+
+df_sum2021$prop <- df_sum2021$value / tapply(df_sum2021$value, df_sum2021$Country, sum)[df_sum2021$Country]
+
+df_sum2022$prop <- df_sum2022$value / tapply(df_sum2022$value, df_sum2022$Country, sum)[df_sum2022$Country]
+```
+
+::: panel-tabset
+## 2020
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+# create bar plot
+yp1 <- ggplot(df_sum2020, aes(x = Country, y = prop, fill = category)) +
+  
+  geom_bar(position = "stack", stat = "identity") +
+  
+  labs(title = "Proportion of Imports/Exports by Country - 2020", x = "Country", y = "Proportion") +
+  scale_y_continuous(labels = scales::percent) + 
+  theme_wsj() + 
+  scale_fill_manual(values = c("#263d2b", "#91790d")) + 
+  
+  theme(
+        plot.margin = margin(t=1, r=1, b=1, l=1),
+        plot.title = element_text(size = 14, face = 'bold', hjust = 0.5),
+        plot.caption = element_text(hjust = 0, face = 'italic'),
+        legend.position = 'bottom',
+
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8))
+
+ggplotly(yp1)
+
+```
+
+## 2021
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+
+yp2 <- ggplot(df_sum2021, aes(x = Country, y = prop, fill = category)) +
+  
+  geom_bar(position = "stack", stat = "identity") +
+  
+  labs(title = "Proportion of Imports/Exports by Country - 2021", x = "Country", y = "Proportion") +
+  scale_y_continuous(labels = scales::percent) + 
+  theme_wsj() + 
+  scale_fill_manual(values = c("#263d2b", "#91790d")) + 
+  
+  theme(
+        plot.margin = margin(t=1, r=1, b=1, l=1),
+        plot.title = element_text(size = 14, face = 'bold', hjust = 0.5),
+        plot.caption = element_text(hjust = 0, face = 'italic'),
+        legend.position = 'bottom',
+
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8))
+
+ggplotly(yp2)
+
+
+```
+
+## 2022
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+yp3 <- ggplot(df_sum2022, aes(x = Country, y = prop, fill = category)) +
+  
+  geom_bar(position = "stack", stat = "identity") +
+  
+  labs(title = "Proportion of Imports/Exports by Country - 2022", x = "Country", y = "Proportion") +
+  scale_y_continuous(labels = scales::percent) + 
+  theme_wsj() + 
+  scale_fill_manual(values = c("#263d2b", "#91790d")) + 
+  
+  theme(
+        plot.margin = margin(t=1, r=1, b=1, l=1),
+        plot.title = element_text(size = 14, face = 'bold', hjust = 0.5),
+        plot.caption = element_text(hjust = 0, face = 'italic'),
+        legend.position = 'bottom',
+
+        axis.title = element_text(size = 12),
+        axis.text = element_text(size = 10),
+
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8))
+
+ggplotly(yp3)
+```
+:::
+
+Over the years, the proportion of imports and exports with each country has largely remained the same. The trend observed here is that of the countries chosen, China & Singapore and USA & Singapore have balances import-export trades, India recorded more exports than imports and United Kingdom recorded more imports than exports over the years.
+
+## 4.5 Comparing mean values across Countries
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+avg_imp <- df_long_six %>% 
+  filter(category == "Import") %>% 
+  mutate(avg_imp = mean(value, na.rm = TRUE)) %>% 
+  group_by(Country) %>% 
+  mutate(country_avg_imp = mean(value, na.rm = TRUE)) %>%
+  ungroup()
+
+avg_exp <- df_long_six %>% 
+  filter(category == "Export") %>% 
+  mutate(avg_exp = mean(value, na.rm = TRUE)) %>% 
+  group_by(Country) %>% 
+  mutate(country_avg_exp = mean(value, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+::: panel-tabset
+## Mean Imports
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+myplot <- avg_imp %>%
+ggplot(aes(x = reorder(Country, value), y = value, color = Country)) +
+geom_jitter(aes(size = year), alpha = 0.7, width = 0.15) +
+geom_hline(aes(yintercept = avg_imp), color = "black", size = 2)+
+geom_segment(aes(x = Country, xend = Country, y = country_avg_imp, yend = avg_imp), size = 2, color = "black") +
+  labs(title = "Comparing Mean Values across Countries", 
+       x = "Countries",
+       y = "Value (SGD)") +
+#ggflags::geom_flag(aes(x = country_name, y = country_avg_trust), size = 10) + 
+  coord_flip() +
+  
+  scale_color_viridis(option = "inferno", discrete = TRUE) + 
+  
+    theme(panel.background = element_rect(fill = 'white'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        
+        axis.line = element_line(color = "black"))
+
+myplot
+
+
+```
+
+## Mean Exports
+
+```{r, message = FALSE, warning = FALSE}
+#| code-fold: true
+
+myplot1 <- avg_exp %>%
+ggplot(aes(x = reorder(Country, value), y = value, color = Country)) +
+geom_jitter(aes(size = year), alpha = 0.7, width = 0.15) +
+geom_hline(aes(yintercept = avg_exp), color = "black", size = 2)+
+geom_segment(aes(x = Country, xend = Country, y = country_avg_exp, yend = avg_exp), size = 2, color = "black") +
+#ggflags::geom_flag(aes(x = country_name, y = country_avg_trust), size = 10) + 
+  coord_flip() + 
+  scale_color_viridis(option = "inferno", discrete = TRUE) +
+  
+    theme(panel.background = element_rect(fill = 'white'),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        
+        axis.line = element_line(color = "black"))
+
+myplot1 
+```
+:::
+
+Over the years, the imports from China and United States have been greater than the mean value, with imports from Japan transcending the mean value over the years, specifically from 2021, whereas the other countries the import value has been below average. The least value of imports is observed for India.
+
+Over the years, the exports from China and United States have been greater than the mean value. The least value of exports is observed for United Kingdom.
+
+# 5. References
+
+1.  Paula, 'Comparing mean values across OECD countries with ggplot', January 26, 2022 ([link](https://rforpoliticalscience.com/2022/01/31/comparing-proportions-across-time-with-dplyr-in-r/))
+2.  Grantham, Neal, 'ggbraid' ([link](https://nsgrantham.github.io/ggbraid/))
