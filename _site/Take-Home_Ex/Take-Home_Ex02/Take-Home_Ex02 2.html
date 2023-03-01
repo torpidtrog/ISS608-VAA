@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.189">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Aishwarya Maloo">
+
+<title>Aishwarya’s Data Journey - Take-Home_Ex02</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Aishwarya’s Data Journey</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-hands-on-exercise" role="button" data-bs-toggle="dropdown" aria-expanded="false">Hands-on Exercise</a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-hands-on-exercise">    
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html">
+ <span class="dropdown-text">Hands-on Exercise 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html">
+ <span class="dropdown-text">Hands-on Exercise 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex03/Hands-on_Ex03.html">
+ <span class="dropdown-text">Hands-on Exercise 3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex04/Hands-on_Ex04.html">
+ <span class="dropdown-text">Hands-on Exercise 4</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex05/Hands-on_Ex05.html">
+ <span class="dropdown-text">Hands-on Exercise 5</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex06/Hands-on_Ex06.html">
+ <span class="dropdown-text">Hands-on Exercise 6</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercise" role="button" data-bs-toggle="dropdown" aria-expanded="false">In-Class Exercise</a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-in-class-exercise">    
+        <li>
+    <a class="dropdown-item" href="../../In-Class_Ex/In-Class_Ex03/In-Class_Ex03.html">
+ <span class="dropdown-text">In-Class Exercise 3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-Class_Ex/In-Class_Ex04/In-Class_Ex04.html">
+ <span class="dropdown-text">In-Class Exercise 4</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-Class_Ex/In-Class_Ex05/In-Class_Ex05_Corrplot.html">
+ <span class="dropdown-text">In-Class Exercise 5:Corrplot</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-Class_Ex/In-Class_Ex05/In-Class_Ex05_Ternary.html">
+ <span class="dropdown-text">In-Class Exercise 5:Ternary</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../In-Class_Ex/In-Class_Ex05/In-Class_Ex05_Heatmap.html">
+ <span class="dropdown-text">In-Class Exercise 5:Heatmap</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-take-home-exercise" role="button" data-bs-toggle="dropdown" aria-expanded="false">Take-Home Exercise</a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-take-home-exercise">    
+        <li>
+    <a class="dropdown-item" href="../../Take-Home_Ex/Take-Home_Ex01/Take-Home_Ex01.html">
+ <span class="dropdown-text">Take-Home Exercise 1</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-Home_Ex/Take-Home_Ex02/Take-Home_Ex02.html">
+ <span class="dropdown-text">Take-Home Exercise 2</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-Home_Ex/Take-Home_Ex03/Take-Home_Ex03.html">
+ <span class="dropdown-text">Take-Home Exercise 3</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="../../Take-Home_Ex/Take-Home_Ex04/Take-Home_Ex04.html">
+ <span class="dropdown-text">Take-Home Exercise 4</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html">Home</a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">About Me</a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#the-task" id="toc-the-task" class="nav-link active" data-scroll-target="#the-task">1. The Task</a></li>
+  <li><a href="#critique" id="toc-critique" class="nav-link" data-scroll-target="#critique">2. Critique</a>
+  <ul class="collapse">
+  <li><a href="#clarity" id="toc-clarity" class="nav-link" data-scroll-target="#clarity">2.1 Clarity</a>
+  <ul class="collapse">
+  <li><a href="#lack-of-details-in-title" id="toc-lack-of-details-in-title" class="nav-link" data-scroll-target="#lack-of-details-in-title">2.1.1 Lack of Details in Title</a></li>
+  <li><a href="#missing-data-source" id="toc-missing-data-source" class="nav-link" data-scroll-target="#missing-data-source">2.1.2 Missing Data Source</a></li>
+  <li><a href="#varied-axes-in-the-detailed-chart" id="toc-varied-axes-in-the-detailed-chart" class="nav-link" data-scroll-target="#varied-axes-in-the-detailed-chart">2.1.3 Varied Axes in the Detailed Chart</a></li>
+  <li><a href="#too-many-groups-in-age-group" id="toc-too-many-groups-in-age-group" class="nav-link" data-scroll-target="#too-many-groups-in-age-group">2.1.4 Too many groups in Age Group</a></li>
+  </ul></li>
+  <li><a href="#aesthetics" id="toc-aesthetics" class="nav-link" data-scroll-target="#aesthetics">2.2 Aesthetics</a>
+  <ul class="collapse">
+  <li><a href="#loss-of-space-using-redundant-overview-chart" id="toc-loss-of-space-using-redundant-overview-chart" class="nav-link" data-scroll-target="#loss-of-space-using-redundant-overview-chart">2.2.1 Loss of Space using Redundant Overview chart</a></li>
+  <li><a href="#unnecessary-legend-filter-and-slide-option" id="toc-unnecessary-legend-filter-and-slide-option" class="nav-link" data-scroll-target="#unnecessary-legend-filter-and-slide-option">2.2.2 Unnecessary legend, filter and slide option</a></li>
+  <li><a href="#overlapping-incomplete-labels-an-in-overview-chart" id="toc-overlapping-incomplete-labels-an-in-overview-chart" class="nav-link" data-scroll-target="#overlapping-incomplete-labels-an-in-overview-chart">2.2.3 Overlapping &amp; Incomplete labels an in Overview Chart</a></li>
+  <li><a href="#missing-age-group-axis-label" id="toc-missing-age-group-axis-label" class="nav-link" data-scroll-target="#missing-age-group-axis-label">2.2.4 Missing Age Group Axis label</a></li>
+  <li><a href="#incorrect-layout-for-the-dashboard-view" id="toc-incorrect-layout-for-the-dashboard-view" class="nav-link" data-scroll-target="#incorrect-layout-for-the-dashboard-view">2.2.5 Incorrect Layout for the Dashboard View</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#proposed-design" id="toc-proposed-design" class="nav-link" data-scroll-target="#proposed-design">3. Proposed Design</a></li>
+  <li><a href="#execution-in-r" id="toc-execution-in-r" class="nav-link" data-scroll-target="#execution-in-r">4. Execution in R</a></li>
+  <li><a href="#learning-from-this-exercise" id="toc-learning-from-this-exercise" class="nav-link" data-scroll-target="#learning-from-this-exercise">5. Learning from this Exercise</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Take-Home_Ex02</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Aishwarya Maloo </p>
+          </div>
+  </div>
+    
+    
+  </div>
+  
+
+</header>
+
+<section id="the-task" class="level1">
+<h1>1. The Task</h1>
+<p>The task is to critique the Take-Home exercise 1 of any of one our peers in terms of what could have been improved with respect to clarity and aesthetics to make it a compelling visual graph. The alternate proposed graph needs to be sketched using the visualisation data design principles and industry best practices. the graph needs to be reproduced in R using ggplot2 and tidyverse packages.</p>
+</section>
+<section id="critique" class="level1">
+<h1>2. Critique</h1>
+<p>Take-Home Exercise 1 required us to create an age-sex pyramid for nine planning areas in Singapore. While my peer did deliver on the task asked, there are some areas of improvement that would have made their chart clear, readable and more visually appealing!</p>
+<p><img src="images/Peer's%20chart.png" class="img-fluid"></p>
+<section id="clarity" class="level2">
+<h2 class="anchored" data-anchor-id="clarity">2.1 Clarity</h2>
+<section id="lack-of-details-in-title" class="level3">
+<h3 class="anchored" data-anchor-id="lack-of-details-in-title">2.1.1 Lack of Details in Title</h3>
+<p>The title for the overview chart is ‘Population Structure in 9 planning areas in SG(June 2022)’, which in itself provides details on location, time and data. However, there is an omission of context on why those planning areas are selected in the overview graph title. The term ‘population structure’ is a vague description, mentioning age-sex pyramid would have been more prudent. The same issue is echoed for the detailed chart.</p>
+</section>
+<section id="missing-data-source" class="level3">
+<h3 class="anchored" data-anchor-id="missing-data-source">2.1.2 Missing Data Source</h3>
+<p>The dashboard does not link the data source reducing the credibility of the dashboard figures.</p>
+</section>
+<section id="varied-axes-in-the-detailed-chart" class="level3">
+<h3 class="anchored" data-anchor-id="varied-axes-in-the-detailed-chart">2.1.3 Varied Axes in the Detailed Chart</h3>
+<p>For the detailed chart, the author has displayed nine different age-sex pyramid charts put together in the dashboard, as opposed to using one chart showcasing all the chosen nine planning areas. This is an issue because the axes for all these planning areas are not uniform. For instance, when we zoom into ‘Novena’ and ‘Changi’ in the ‘Detailed population structure in Each Area’, we observe that the female population aged 90 and above appear to have a similar population count. However, when we hover over those points, it reveals that the population count in ‘Changi’ is 10 whereas it 310 for ‘Novena.’</p>
+</section>
+<section id="too-many-groups-in-age-group" class="level3">
+<h3 class="anchored" data-anchor-id="too-many-groups-in-age-group">2.1.4 Too many groups in Age Group</h3>
+<p>The age bands for the grouping is 5 years which results in nineteen different groups. This is a lot of information for the brain to process together, the chart would be more readable if the age groups were reduced.</p>
+</section>
+</section>
+<section id="aesthetics" class="level2">
+<h2 class="anchored" data-anchor-id="aesthetics">2.2 Aesthetics</h2>
+<section id="loss-of-space-using-redundant-overview-chart" class="level3">
+<h3 class="anchored" data-anchor-id="loss-of-space-using-redundant-overview-chart">2.2.1 Loss of Space using Redundant Overview chart</h3>
+<p>The overview chart is conveying the same information as the detailed chart, with uniform axes for all nine planning areas, however it is displayed side by side as opposed to the 3X3 panel structure in the detailed chart. The panel area allocated to the overview chart is small, making it challenging for the audience to view and grasp information. For instance, look at ‘Changi’ in planning area, one can barely see the bars. The overview chart occupies space that could have been better used for the detailed chart, rendering it redundant.</p>
+</section>
+<section id="unnecessary-legend-filter-and-slide-option" class="level3">
+<h3 class="anchored" data-anchor-id="unnecessary-legend-filter-and-slide-option">2.2.2 Unnecessary legend, filter and slide option</h3>
+<p>The axes are clearly labelled for ‘male population’ and ‘female population’ therefore there is no need for the legend as it wastes space. Additionally, the filter is for the overview chart, adding more planning areas would reduce the already hampered visibility of the overview chart, therefore its an unnecessary addition. The slider has no functionality in this chart and should be removed.</p>
+</section>
+<section id="overlapping-incomplete-labels-an-in-overview-chart" class="level3">
+<h3 class="anchored" data-anchor-id="overlapping-incomplete-labels-an-in-overview-chart">2.2.3 Overlapping &amp; Incomplete labels an in Overview Chart</h3>
+<p>The age group axis has age groups that are overlapping, thereby impeding graph readability. Additionally, the ‘female population’ axis label is not appearing completely in view, which makes the graph look untidy.</p>
+</section>
+<section id="missing-age-group-axis-label" class="level3">
+<h3 class="anchored" data-anchor-id="missing-age-group-axis-label">2.2.4 Missing Age Group Axis label</h3>
+<p>‘Age’ as a label has been mentioned only in ‘Ang Mo Kio’. The label has a small font, which can be overlooked by the audience. While, the audience is smart enough to gauge that the groups on the Y axis is ‘Age Groups’, it would be better to add it in as it makes the graph look more complete.</p>
+</section>
+<section id="incorrect-layout-for-the-dashboard-view" class="level3">
+<h3 class="anchored" data-anchor-id="incorrect-layout-for-the-dashboard-view">2.2.5 Incorrect Layout for the Dashboard View</h3>
+<p>The dashboard layout is not set to ‘Automatic’, therefore even in ‘Full View’ option in ‘Tableau Public’, one needs to scroll, which is a hassle for the viewer. The audience can better understand the graph if it appears in the same window.</p>
+</section>
+</section>
+</section>
+<section id="proposed-design" class="level1">
+<h1>3. Proposed Design</h1>
+<p><img src="images/AM%20Sketch_Edited.png" class="img-fluid"></p>
+<p><strong>Improvements:</strong></p>
+<p>a) The planning areas will be selected on the basis of the top 9 most populated planning areas in Singapore. This criterion is picked as the original graph lacks context on the area selection. The selection criteria will be updated in the graph title to make the graph more comprehensive.</p>
+<p>b) The age groups will be further grouped with gaps of 10 years as opposed to the original 5 years. The age label will be incorporated as well.</p>
+<p>c) The data source is added in the graph.</p>
+<p>d) Change in Aesthetics: age group label is clearly stated, there are no overlapping labels, legend is placed below to increase the space for the panel chart to enhance graph readability.</p>
+</section>
+<section id="execution-in-r" class="level1">
+<h1>4. Execution in R</h1>
+<p>4.1 To start with R, we need to load the requisite packages to enable data manipulation, wrangling and visualisation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(tidyverse, patchwork, </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>               ggthemes, hrbrthemes,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>               ggrepel, RColorBrewer, gridExtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>4.2 To get started, we load the dataset into RStudio using ‘read_csv’. This is preferred over ‘read.csv’ because it takes into account the space in variable names. The dataset has 4 character variables - ‘Sex’, ‘Planning Area’, ‘Age Group’, ‘Pop_Proportion’ and one numerical variable - ‘Population’.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">'data/AgeSexPop.csv'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 1980 Columns: 5
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr (4): Sex, Planning Area, Age Group, Pop_Proportion
+dbl (1): Population
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+</div>
+<p>4.3 There are 19 age groups provided in the dataset, for our graph, we will reduce the number of age bands by increasing the range from 5 years to 10 years for the age group.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>data<span class="sc">$</span>Age_groups <span class="ot">&lt;-</span> <span class="fu">with</span>(data, dplyr<span class="sc">::</span><span class="fu">case_when</span>(<span class="st">`</span><span class="at">Age Group</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"0 - 4"</span>, <span class="st">"5 - 9"</span>) <span class="sc">~</span> <span class="st">'0 - 9'</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">`</span><span class="at">Age Group</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"10 - 14"</span>, <span class="st">"15 - 19"</span>) <span class="sc">~</span> <span class="st">'10 - 19'</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">`</span><span class="at">Age Group</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"20 - 24"</span>, <span class="st">"25 - 29"</span>) <span class="sc">~</span> <span class="st">'20 - 29'</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">`</span><span class="at">Age Group</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"30 - 34"</span>, <span class="st">"35 - 39"</span>) <span class="sc">~</span> <span class="st">'30 - 39'</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">`</span><span class="at">Age Group</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"40 - 44"</span>, <span class="st">"45 - 49"</span>) <span class="sc">~</span> <span class="st">'40 - 49'</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">`</span><span class="at">Age Group</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"50 - 54"</span>, <span class="st">"55 - 59"</span>) <span class="sc">~</span> <span class="st">'50 - 59'</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">`</span><span class="at">Age Group</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"60 - 64"</span>, <span class="st">"65 - 69"</span>) <span class="sc">~</span> <span class="st">'60 - 69'</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">`</span><span class="at">Age Group</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"70 - 74"</span>, <span class="st">"75 - 79"</span>) <span class="sc">~</span> <span class="st">'70 - 79'</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                                               <span class="st">`</span><span class="at">Age Group</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"80 - 84"</span>, <span class="st">"85 &amp; Over"</span>) <span class="sc">~</span> <span class="st">'80+'</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>4.4 We are plotting the nine most populated planning areas in Singapore. To find the sum, we use the tidyverse package to group the data by planning area, then summing the population in a new variable ‘sum_pop’ and finally arranging it in descending order and slicing it to get the top 9 populated areas.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data_PlanningArea <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="st">`</span><span class="at">Planning Area</span><span class="st">`</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">sum_pop =</span> <span class="fu">sum</span>(Population), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(sum_pop,<span class="at">.by_group =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">top_n</span>(<span class="dv">9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Selecting by sum_pop</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data_PlanningArea</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 9 × 2
+  `Planning Area` sum_pop
+  &lt;chr&gt;             &lt;dbl&gt;
+1 Choa Chu Kang    174430
+2 Ang Mo Kio       174920
+3 Yishun           202060
+4 Sengkang         206730
+5 Hougang          222450
+6 Woodlands        250270
+7 Tampines         261300
+8 Jurong West      272810
+9 Bedok            289850</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>top9_PA <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="fu">filter</span>(<span class="st">`</span><span class="at">Planning Area</span><span class="st">`</span> <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Choa Chu Kang"</span>, <span class="st">"Ang Mo Kio"</span>, <span class="st">"Yishun"</span>, <span class="st">"Sengkang"</span>, <span class="st">"Hougang"</span>, <span class="st">"Woodlands"</span>, <span class="st">"Tampines"</span>, <span class="st">"Jurong West"</span>,<span class="st">"Bedok"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>4.5 Finally, we use ggplot to create the proposed visualisation</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plot_PA <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(<span class="at">data =</span> top9_PA, <span class="fu">aes</span>(<span class="at">x =</span> Age_groups, <span class="at">y =</span> Population, <span class="at">fill =</span> Sex)) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">data =</span> top9_PA <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Sex <span class="sc">==</span> <span class="st">"Male"</span>),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">stat =</span> <span class="st">"identity"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">position =</span> <span class="st">"identity"</span>) <span class="sc">+</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">data =</span> top9_PA <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Sex <span class="sc">==</span> <span class="st">"Female"</span>),</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">stat =</span> <span class="st">"identity"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>           <span class="at">position =</span> <span class="st">"identity"</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>           <span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">y =</span> <span class="sc">-</span>(Population))) <span class="sc">+</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values=</span><span class="fu">c</span>(<span class="st">"coral4"</span>, <span class="st">"paleturquoise4"</span>)) <span class="sc">+</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span> ( <span class="at">x =</span> <span class="st">"Age Group"</span>, <span class="at">y =</span> <span class="st">"Population in Planning Area in Thousands"</span>,  <span class="at">title =</span> <span class="st">"Age-Sex Pyramid of the 9 most populated planning areas in Singapore - June 2022"</span>, <span class="at">subtitle =</span> <span class="st">" "</span>, <span class="at">caption =</span> <span class="st">"Source: Department of Statistics, Singapore (SingStat)"</span>) <span class="sc">+</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">15000</span>,<span class="dv">15000</span>,<span class="dv">3000</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"15"</span>, <span class="st">"12"</span>, <span class="st">"09"</span>, <span class="st">"06"</span>, <span class="st">"03"</span>, <span class="st">"0"</span>, <span class="st">"03"</span>, <span class="st">"06"</span>, <span class="st">"09"</span>, <span class="st">"12"</span>, <span class="st">"15"</span>)) <span class="sc">+</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span><span class="st">`</span><span class="at">Planning Area</span><span class="st">`</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>plot_PA</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-Home_Ex02_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#just for fonts, size, placements</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>plot_PA <span class="sc">+</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">text =</span> <span class="fu">element_text</span>(<span class="at">family =</span> <span class="st">"Garamond"</span>),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="at">t=</span><span class="fl">0.1</span>, <span class="at">r=</span><span class="fl">0.1</span>, <span class="at">b=</span><span class="fl">0.1</span>, <span class="at">l=</span><span class="fl">0.1</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.title =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="fl">0.3</span>, <span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">12</span>), </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.caption =</span> <span class="fu">element_text</span>(<span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">face =</span> <span class="st">"italic"</span>, <span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot.caption.position =</span> <span class="st">'plot'</span>,</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.major.x =</span> <span class="fu">element_line</span>(<span class="at">colour =</span> <span class="st">'grey'</span>, <span class="at">linewidth =</span> <span class="fl">0.2</span>, <span class="at">linetype =</span> <span class="st">"dotted"</span>),</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.major.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.minor.x =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.minor.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">8</span>, <span class="at">face =</span> <span class="st">"bold"</span>),</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.line =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">'grey'</span>),</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.ticks =</span> <span class="fu">element_line</span>(<span class="at">color =</span> <span class="st">'grey'</span>),</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.title =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">"bold"</span>, <span class="at">size =</span> <span class="dv">12</span>),</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.title =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">10</span>),</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.key.size =</span> <span class="fu">unit</span>(<span class="dv">5</span>, <span class="st">"mm"</span>),</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position =</span> <span class="st">"bottom"</span>) <span class="sc">+</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">strip.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>, <span class="at">face =</span> <span class="st">"bold"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="Take-Home_Ex02_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="learning-from-this-exercise" class="level1">
+<h1>5. Learning from this Exercise</h1>
+<p>5.1 My peer’s design gave me an opportunity to reflect on my take home exercise 1. There were minute details lacking which if incorporated would have enhanced my graph design.</p>
+<p>5.2 It enabled me to dedicate more time to using tidyverse and ggplot packages. Initially, I would have to ‘’google’ how to improve aesthetics in RStudio, but with the resources provided, I was able to identify which command enabled which function, for instance I would have to refer to ‘plot.title’ for making changes to the title, panel.grid for making changes with the grid.</p>
+<p>5.3 I learnt how making small changes such as providing context, correct labeling and positioning can have a considerable impact on the overall graph clarity and aethetics.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
