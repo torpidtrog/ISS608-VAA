@@ -2,4 +2,40 @@
 title: "About Me"
 ---
 
-Hello! I am Aishwarya Maloo, an aspiring data analyst. 
+Hello, I am Aishwarya Maloo, an aspiring data analyst. I am currently a student at Singapore Management
+University, pursuing my Master of Information Technology in Business (Analytics track). I will be graduating in mid-April 2023. Here's some information about me -
+
+### **Educational Background**
+
+-   **Master of Information Technology in Business (Analytics track)** - Singapore Management University (Singapore): This was a really intensive data analytics course with a balance of theoretical and practical knowledge. The courses covered were Python Programming, Statistics, Data Analytics Lab, Customer Analytics, Applied Machine Learning, Visual Analytics, Social Analytics and Big Data.
+
+-   **Master in Economics** - Narsee Monjee Institute of Management Studies (Mumbai, India): I majored in Economics and thought my course I have an advanced understanding of macro-economic, micro-economic and econometric concepts!
+
+-   **Bachelor in Commerce** - HR College (Mumbai, India): My bachelor's set the foundation of accounting and finance. 
+
+### **Work Experience**
+
+-   **Data Analytics Intern** - Mighty Jaxx: I have leveraged my technical and analytical skills to design and test data engineering infrastructure, enable competitor analysis through web-scraping in Python, and visualized imperative data points using Tableau for the senior management.
+
+-   **Investment Performance Specialist** - JP Morgan: I have managed and analysed large Assets under management databases, automated periodic reports in Alteryx to minimise manual errors and strengthen audit controls to save significant amounts of time and resources for my previous employers.
+
+### **Learnings and Skills**
+
+-   **Understanding of Data:** the ability to comprehend and manipulate large datasets using programming languages (Python, R, SQL). Additionally, tidy and pre-process the data to remove errors, inconsistencies to render it complete for analysis.
+
+-   **Data Analysis and Visualisation:** the knowledge to use the right statistical methods to meaningfully analyze the data and extract insights. Also, create visualizations (Tableau, R, Python, Power BI) that help
+    to communicate complex data insights to stakeholders.
+
+-   **Time management:** my corporate experience and academic workload have instilled within me an ability to multi-task. I can prioritise important tasks and manage my time effectively to meet my deadlines and deliver results.
+
+-   **Leadership and Collaboration:** At JP Morgan, I had the opportunity to lead a team of five people for automating manual processes. I think I succeeded as a leader because I was able to delegate tasks, ensure my team met the deadline andeveryone worked harmoniously. I can also work effectively in a team environment and collaborate with other analysts, data scientists, and stakeholders.
+
+### **Miscellaneous Information**
+
+-   I am fluent in English, Hindi and Marwari
+
+-   I am an expat and will be requiring an employment pass to work in Singapore
+
+-   Phone number: +65 88233779
+
+    ### 

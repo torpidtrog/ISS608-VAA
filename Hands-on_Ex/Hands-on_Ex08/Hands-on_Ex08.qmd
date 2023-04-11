@@ -46,7 +46,7 @@ Next, we will examine the structure of the data frame using *glimpse()* of **dpl
 glimpse(GAStech_edges)
 ```
 
-**Warning**: The output report of GAStech_edges above reveals that the *SentDate* is treated as \"Character\"\" data type instead of *date* data type. This is an error! Before we continue, it is important for us to change the data type of *SentDate* field back to \"Date\"\" data type.
+**Warning**: The output report of GAStech_edges above reveals that the *SentDate* is treated as "Character"" data type instead of *date* data type. This is an error! Before we continue, it is important for us to change the data type of *SentDate* field back to "Date"" data type.
 
 ### **Wrangling time**
 
@@ -170,7 +170,7 @@ Two functions of **tidygraph** package can be used to create network objects, th
 
 ### **Using tbl_graph() to build tidygraph data model.**
 
-In this section, you will use *tbl_graph()* of **tinygraph** package to build an tidygraph\'s network graph data.frame.
+In this section, you will use *tbl_graph()* of **tinygraph** package to build an tidygraph's network graph data.frame.
 
 Before typing the codes, you are recommended to review to reference guide of [*tbl_graph()*](https://tidygraph.data-imaginist.com/reference/tbl_graph.html)
 
@@ -182,7 +182,7 @@ GAStech_graph <- tbl_graph(nodes = GAStech_nodes,
                            directed = TRUE)
 ```
 
-### **Reviewing the output tidygraph\'s graph object**
+### **Reviewing the output tidygraph's graph object**
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -190,17 +190,17 @@ GAStech_graph <- tbl_graph(nodes = GAStech_nodes,
 GAStech_graph
 ```
 
-### **Reviewing the output tidygraph\'s graph object**
+### **Reviewing the output tidygraph's graph object**
 
 -   The output above reveals that *GAStech_graph* is a tbl_graph object with 54 nodes and 4541 edges.
 
--   The command also prints the first six rows of \"Node Data\" and the first three of \"Edge Data\".
+-   The command also prints the first six rows of "Node Data" and the first three of "Edge Data".
 
 -   It states that the Node Data is **active**. The notion of an active tibble within a tbl_graph object makes it possible to manipulate the data in one tibble at a time.
 
 ### **Changing the active object**
 
-The nodes tibble data frame is activated by default, but you can change which tibble data frame is active with the *activate()* function. Thus, if we wanted to rearrange the rows in the edges tibble to list those with the highest \"weight\" first, we could use *activate()* and then *arrange()*.
+The nodes tibble data frame is activated by default, but you can change which tibble data frame is active with the *activate()* function. Thus, if we wanted to rearrange the rows in the edges tibble to list those with the highest "weight" first, we could use *activate()* and then *arrange()*.
 
 For example,
 
@@ -218,7 +218,7 @@ Visit the reference guide of [*activate()*](https://tidygraph.data-imaginist.com
 
 [**ggraph**](https://ggraph.data-imaginist.com/) is an extension of **ggplot2**, making it easier to carry over basic ggplot skills to the design of network graphs.
 
-As in all network graph, there are three main aspects to a **ggraph**\'s network graph, they are:
+As in all network graph, there are three main aspects to a **ggraph**'s network graph, they are:
 
 -   [nodes](https://cran.r-project.org/web/packages/ggraph/vignettes/Nodes.html),
 
@@ -246,7 +246,7 @@ Things to learn from the code chunk above:
 
 ### **Changing the default network graph theme**
 
-In this section, you will use [*theme_graph()*](https://ggraph.data-imaginist.com/reference/theme_graph.html) to remove the x and y axes. Before your get started, it is advisable to read it\'s reference guide at least once.
+In this section, you will use [*theme_graph()*](https://ggraph.data-imaginist.com/reference/theme_graph.html) to remove the x and y axes. Before your get started, it is advisable to read it's reference guide at least once.
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -280,7 +280,7 @@ g + theme_graph(background = 'grey10',
                 text_colour = 'white')
 ```
 
-### **Working with ggraph\'s layouts**
+### **Working with ggraph's layouts**
 
 **ggraph()** support many layout for standard used, they are: star, circle, nicely (default), dh, gem, graphopt, grid, mds, spahere, randomly, fr, kk, drl and lgl. Figures below and on the right show layouts supported by **ggraph()**.
 
@@ -363,7 +363,7 @@ There are three functions in ggraph to implement faceting, they are:
 
 ### **Working with *facet_edges()***
 
-In the code chunk below, [*facet_edges()*](https://ggraph.data-imaginist.com/reference/facet_edges.html) is used. Before getting started, it is advisable for you to read it\'s reference guide at least once.
+In the code chunk below, [*facet_edges()*](https://ggraph.data-imaginist.com/reference/facet_edges.html) is used. Before getting started, it is advisable for you to read it's reference guide at least once.
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -426,7 +426,7 @@ g + facet_edges(~Weekday) +
 
 ### **Working with *facet_nodes()***
 
-In the code chunkc below, [*facet_nodes()*](https://ggraph.data-imaginist.com/reference/facet_nodes.html) is used. Before getting started, it is advisable for you to read it\'s reference guide at least once.
+In the code chunkc below, [*facet_nodes()*](https://ggraph.data-imaginist.com/reference/facet_nodes.html) is used. Before getting started, it is advisable for you to read it's reference guide at least once.
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -451,7 +451,7 @@ g + facet_nodes(~Department)+
 
 ### **Computing centrality indices**
 
-Centrality measures are a collection of statistical indices use to describe the relative important of the actors are to a network. There are four well-known centrality measures, namely: degree, betweenness, closeness and eigenvector. It is beyond the scope of this hands-on exercise to cover the principles and mathematics of these measure here. Students are encouraged to refer to *Chapter 7: Actor Prominence* of **A User\'s Guide to Network Analysis in R** to gain better understanding of theses network measures.
+Centrality measures are a collection of statistical indices use to describe the relative important of the actors are to a network. There are four well-known centrality measures, namely: degree, betweenness, closeness and eigenvector. It is beyond the scope of this hands-on exercise to cover the principles and mathematics of these measure here. Students are encouraged to refer to *Chapter 7: Actor Prominence* of **A User's Guide to Network Analysis in R** to gain better understanding of theses network measures.
 
 ```{r, message = FALSE, warning = FALSE}
 #| code-fold: true
@@ -516,9 +516,9 @@ g + theme_graph()
 
 -   *visNetwork()* function uses a nodes list and edges list to create an interactive graph.
 
-    -   The nodes list must include an \"id\" column, and the edge list must have \"from\" and \"to\" columns.
+    -   The nodes list must include an "id" column, and the edge list must have "from" and "to" columns.
 
-    -   The function also plots the labels for the nodes, using the names of the actors from the \"label\" column in the node list.
+    -   The function also plots the labels for the nodes, using the names of the actors from the "label" column in the node list.
 
 -   The resulting graph is fun to play around with.
 
@@ -569,11 +569,11 @@ visNetwork(GAStech_nodes,
 
 ------------------------------------------------------------------------
 
-Visit [Igraph](http://datastorm-open.github.io/visNetwork/igraph.html) to find out more about *visIgraphLayout*\'s argument.
+Visit [Igraph](http://datastorm-open.github.io/visNetwork/igraph.html) to find out more about *visIgraphLayout*'s argument.
 
 ### **Working with visual attributes - Nodes**
 
-visNetwork() looks for a field called \"group\" in the nodes object and colour the nodes according to the values of the group field.
+visNetwork() looks for a field called "group" in the nodes object and colour the nodes according to the values of the group field.
 
 The code chunk below rename Department field to group.
 
@@ -619,7 +619,7 @@ visNetwork(GAStech_nodes,
 
 ------------------------------------------------------------------------
 
-Visit [Option](http://datastorm-open.github.io/visNetwork/edges.html) to find out more about visEdges\'s argument. \]
+Visit [Option](http://datastorm-open.github.io/visNetwork/edges.html) to find out more about visEdges's argument. \]
 
 ### **Interactivity**
 
@@ -631,6 +631,6 @@ Show the codeSelect by idMat.BramarAnda.RiberaRachel.PantanalLinda.LagosRuscella
 
 ------------------------------------------------------------------------
 
-Visit [Option](http://datastorm-open.github.io/visNetwork/options.html) to find out more about visOption\'s argument.
+Visit [Option](http://datastorm-open.github.io/visNetwork/options.html) to find out more about visOption's argument.
 
 \
