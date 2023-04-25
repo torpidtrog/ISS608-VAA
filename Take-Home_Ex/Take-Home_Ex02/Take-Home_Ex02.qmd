@@ -1,5 +1,5 @@
 ---
-title: "Take-Home_Ex02"
+title: "Age-Population Pyramid - Singapore 2022 (RStudio)"
 author: "Aishwarya Maloo"
 editor: visual
 ---

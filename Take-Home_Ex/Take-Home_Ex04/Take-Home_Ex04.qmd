@@ -1,5 +1,5 @@
 ---
-title: "Take-Home_Ex04"
+title: "Unpacking International Trade Relations with Singapore 2020-22"
 author: "Aishwarya Maloo"
 format: html
 date: "14 February 2023"

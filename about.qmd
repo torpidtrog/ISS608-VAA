@@ -2,8 +2,7 @@
 title: "About Me"
 ---
 
-Hello, I am Aishwarya Maloo, an aspiring data analyst. I am currently a student at Singapore Management
-University, pursuing my Master of Information Technology in Business (Analytics track). I will be graduating in mid-April 2023. Here's some information about me -
+Hello, I am Aishwarya Maloo, an aspiring data analyst. Here's some information about me -
 
 ### **Educational Background**
 
@@ -23,8 +22,7 @@ University, pursuing my Master of Information Technology in Business (Analytics 
 
 -   **Understanding of Data:** the ability to comprehend and manipulate large datasets using programming languages (Python, R, SQL). Additionally, tidy and pre-process the data to remove errors, inconsistencies to render it complete for analysis.
 
--   **Data Analysis and Visualisation:** the knowledge to use the right statistical methods to meaningfully analyze the data and extract insights. Also, create visualizations (Tableau, R, Python, Power BI) that help
-    to communicate complex data insights to stakeholders.
+-   **Data Analysis and Visualisation:** the knowledge to use the right statistical methods to meaningfully analyze the data and extract insights. Also, create visualizations (Tableau, R, Python, Power BI) that help to communicate complex data insights to stakeholders.
 
 -   **Time management:** my corporate experience and academic workload have instilled within me an ability to multi-task. I can prioritise important tasks and manage my time effectively to meet my deadlines and deliver results.
 
@@ -32,10 +30,12 @@ University, pursuing my Master of Information Technology in Business (Analytics 
 
 ### **Miscellaneous Information**
 
--   I am fluent in English, Hindi and Marwari
+-   I am fluent in English and Hindi
 
 -   I am an expat and will be requiring an employment pass to work in Singapore
 
 -   Phone number: +65 88233779
+
+-   Email: aishwarya.2021\@mitb.smu.edu.sg \| aishwarya\@maloo.in
 
     ### 

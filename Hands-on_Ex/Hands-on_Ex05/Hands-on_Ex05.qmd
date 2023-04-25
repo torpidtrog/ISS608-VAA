@@ -1,5 +1,5 @@
 ---
-title: "Hands-on_Ex05"
+title: "Building Ternary Plot with R"
 author: "Aishwarya Maloo"
 date: "10 February 2023"
 date-modified: "`r Sys.Date()`"
@@ -11,7 +11,7 @@ execute:
 editor: visual
 ---
 
-# **Hands-on Exercise 5: Building Ternary Plot with R**
+# **Building Ternary Plot with R**
 
 # **Overview**
 

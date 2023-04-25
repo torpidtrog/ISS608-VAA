@@ -1,5 +1,5 @@
 ---
-title: "In-Class_Ex04"
+title: "Interactivity"
 author: "Aishwarya Maloo"
 date: "4 February 2023"
 date-modified: "`r Sys.Date()`"
@@ -10,6 +10,8 @@ execute:
   warning: false
 editor: visual
 ---
+
+## **Fundamentals of Visualisation**
 
 ```{r}
 #| echo: false

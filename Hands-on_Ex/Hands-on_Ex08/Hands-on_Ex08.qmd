@@ -1,8 +1,10 @@
 ---
-title: "Hands-on_Ex08"
+title: "Network Data Visualisation and Analysis"
 author: "Aishwarya Maloo"
 editor: visual
 ---
+
+# **Network Data Visualisation and Analysis**
 
 ## **Getting Started**
 

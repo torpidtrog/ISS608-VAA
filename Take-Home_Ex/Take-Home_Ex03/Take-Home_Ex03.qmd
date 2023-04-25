@@ -1,5 +1,5 @@
 ---
-title: "Take-Home_Ex03"
+title: "Is the Media Noise around Re-sale price (2022) right?"
 author: "Aishwarya Maloo"
 date: "10 February 2023"
 date-modified: "`r Sys.Date()`"
@@ -25,7 +25,7 @@ For the purpose of this study, the focus should be on **3-ROOM, 4-ROOM and 5-ROO
 The data used is '*Resale flat princes based on registration date from Jan-2017 onwards',* which was obtained from [Data.gov.sg](https://data.gov.sg/). The data has 147601 rows and 11 columns.
 
 | Columns             | Description                                           |
-|---------------------|-------------------------------------------------------|
+|----------------------|--------------------------------------------------|
 | month               | Month and year of listing                             |
 | town                | Planning area in Singapore                            |
 | flat_type           | Type of flats available - 1 room, 2 room, 3 room, etc |
@@ -56,7 +56,7 @@ sg_re_price <- read_csv("data/resale_flat_prices.csv")
 ## 3.3 Data Prep
 
 | Issues        | Description                                                                                                                                                                  | Resolution                                                                                                                |
-|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+|-----------------|---------------------------------|----------------------|
 | Outliers      | The resale price has outliers where the price goes up 141800. The top 10% of resale price are outliers.                                                                      | Outliers should be excluded from the data. Anything falling above the 3rd quartile is filtered out from the data. (3.3.4) |
 | Variable type | Date is available in the form of 'YYYY - MM' which is not readable in R                                                                                                      | Format date, seperate month into month and year. (3.3.1)                                                                  |
 | New variables | Lease start date and lease years cannot be used for analysis. Additionally, floor area and reslae price can be used to calculate price per square meter to enhance analysis. | price_psm, priceK and property age are calculated. (3.3.2)                                                                |

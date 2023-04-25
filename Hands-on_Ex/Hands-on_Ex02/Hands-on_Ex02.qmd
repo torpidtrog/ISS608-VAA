@@ -1,5 +1,6 @@
 ---
-title: "Hands-On Exercise 2: Beyond ggplot2 Fundamentals"
+title: "Beyond ggplot2 Fundamentals"
+author: "Aishwarya Maloo"
 ---
 
 ```{r}

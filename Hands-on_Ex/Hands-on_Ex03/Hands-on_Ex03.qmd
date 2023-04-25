@@ -1,5 +1,5 @@
 ---
-title: "Hands-on_Ex03"
+title: "Interactivity in R"
 author: "Aishwarya Maloo"
 date: "2 February 2023"
 date-modified: "`r Sys.Date()`"
@@ -11,7 +11,7 @@ execute:
 editor: visual
 ---
 
-# Hands-On Exercise 3: **Programming Interactive Data Visualisation with R**
+# **Programming Interactive Data Visualisation with R**
 
 # Getting Started
 
